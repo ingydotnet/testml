@@ -1,0 +1,13 @@
+[% WRAPPER html.tt2 %]
+<h1>TestML - A Common Testing Meta Language for Many Programming
+Languages</h1>
+
+<p>
+Welcome to <b>TestML</b>. TestML is a generic testing meta language that is
+used to write data driven unit tests for software in any programming language. 
+</p>
+
+<ul>
+<li><a href="spec/">The TestML version 1.0 Specification</a></li>
+</ul>
+[% END %]

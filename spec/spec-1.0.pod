@@ -1,0 +1,281 @@
+=encoding utf-8
+
+=head1 TestML
+
+A Software Testing Meta Language. Version 1.0.
+
+=head1 Overview
+
+B<TestML> is a meta language for writing tests that define how a piece
+of software should behave, regardless of what programming language that
+software is written in.
+
+It is primarily intended for generic libraries or modules that are
+relevant in many languages, or that have multiple implementations in the
+same language. In these scenarios, the different implementations all use
+the exact same tests. However, TestML's clarity and ease of use may make
+it desirable for testing all types of software.
+
+TestML documents define a set of data points and a very abstract set of
+transformations that turn one set of points to match the expected result
+point. Here is a very simple example:
+
+    testml: 1.0
+    input.uppercase() == output
+    === Test mixed case string
+    --- input: I Like Pie
+    --- output: I LIKE PIE
+
+In this case, a programmer of any given language would do the following:
+
+=over
+
+=item * Implement a library "Foo" that can turn strings to upper case.
+
+=item * Implement a TestML "bridge class" that defines the 'uppercase'
+transform to invoke the Foo upper casing facility.
+
+=item * Set up their test environment to use TestML to run the test.
+
+=back
+
+=head1 History
+
+The concept of TestML was heavily inspired by Ward Cunningham's B<FIT>
+test framework. The primary difference is that FIT's test documents are
+table/spreadsheet based, where TestML's are text file based. This belies
+the premise that FIT caters to business application development (where
+spreadsheets are heavily used), and TestML caters to open source library
+authors (where everything is in text files).
+
+The specifics of TestML, and the data format specifically, evolved
+directly from Ingy döt Net's Perl data-driven testing framework,
+Test::Base. Test::Base was written in 2004 and later ported to
+JavaScript. As Ingy ported various libraries to other languages, he
+realized the potential value of having the test suites be reusable.
+
+=head1 Design Goals
+
+TestML has the following Design Goals:
+
+=over
+
+=item Platform Agnostic
+
+TestML strives to make no assumptions about the programming language,
+environment, or testing framework it will be used in. In this way, the exact
+same corpus of test documents can be used against multiple implementations
+of equivalent software.
+
+=item Ease of Implementation
+
+TestML is designed to be fairly easy to implement in various programming
+languages.
+
+The TestML project has a set of tests (written in TestML) that a TestML
+implementation must pass to be compliant. See L<http://testml.org/tests/>.
+
+=item Readability
+
+TestML lets you define tests that are both easy for you and others to
+write, read and maintain. The format is intended to let the data points
+and test conditions be very clear, while hiding the details of
+implementation in the I<bridge class>.
+
+=item Extensibility
+
+TestML has been designed with the acknowledgement that it will need to
+evolve to meet many various testing requirements. For this reason, every
+document requires a TestML version number. Also the original grammar has
+been made quite strict, leaving a lot of room for future extension.
+
+=back
+
+=head1 Terminology
+
+TestML uses a number of specific terms. This glossary lists and defines their
+meanings.
+
+=over
+
+=item Assertion
+
+A I<test assertion> is a statement in the I<TestML document> that
+compares two I<data points> using a I<testing operator>, after they have
+been passed through a set of I<data transforms>.
+
+=item Block
+
+A I<data block> is an object that contains a set of named I<data
+points>. The block usually has a short description phrase. When the
+tests are run, the I<runner class> will run each of the I<test
+assertions> against each of the I<data blocks> that contains the I<data
+points> needed by the assertion.
+
+=item Bridge
+
+Every test setup defines a class that connects named transformations to
+the software being tested. This is known as a I<bridge class>, because
+it bridges the test to the application or library.
+
+=item Document
+
+A I<TestML document> is a file containing some number of I<test
+assertions> and I<data blocks>. This specification describes the format
+of such a document.
+
+=item Meta
+
+A I<TestML document> can define any number of key/value pairs which are
+considered I<meta data> and are used to instantiate a I<meta object>
+that the test code can later access.
+
+=item Operator
+
+A I<testing operator> is a method that compares the final state of
+two data points. The only operator currently currently defined by
+TestML is the '==' operator, which compares two unicode strings for
+an exact match.
+
+=item Point
+
+A I<data point> is a named piece of data that belongs to a given I<data
+block>. All data points are assumed to start out as unicode strings,
+although a I<data transform> may turn them into anything else.
+
+=item Section
+
+Every I<TestML document> has two sections, a I<head section> and a
+I<data section>. The former specifies I<meta information> and the I<test
+assertions> that the document is declaring. The latter section defines
+the I<data blocks> against which the test assertions are applied.
+
+=item Transform
+
+A I<transform> is a method provided by a I<bridge class> that changes a
+I<data point> form one form into another. A transform usually invokes
+functionality of the application it is testing. The whole idea of
+TestML is that by passing a data point through one or more transforms,
+you can make it equivalent to some other data point, which causes the
+test to pass.
+
+=back
+
+=head1 The Specification
+
+To simplify the TestML Specification, it is defined as both a I<set of
+BNF grammars>, and a I<set of constraints>. The grammars include a I<top level
+document grammar> and a separate I<Testml data section grammar>. The data
+section is separate, because it may be marked up in any of several syntaxes.
+
+=head2 Top Level Document Grammar
+
+=over
+
+=item document := head-section data-section
+
+A TestML Document consists of 2 sections, a head section followed by a data section.
+
+Here is an example document:
+
+    # TestML document head section includes:
+    # Meta statements,
+    testml: 1.0
+    key1: value1
+    # And test assertions.
+    foo.upper() == bar
+    foo == bar.lower()
+
+    # The data section defines data objects.
+    === Test vowels
+    --- foo: i ie ie
+    --- bar: I IE IE
+    === Test consonants
+    --- foo
+    lk p
+    --- bar
+    LK P
+
+=item head-section := ( meta-statement | test-statement | include-statement | comment | blank-line )+
+
+The head section contains both general information (meta statements)
+about the test document and the definitions of the assertions the test
+is declaring (test statements).
+
+The parsing of the head section should instantiate two TestML objects: the
+Meta object and the Assertions object.
+
+=item meta-statement := keyword ':' space+ value eol
+
+Meta statements are key/value pairs separated by a colon and whitespace. A
+given meta setting may affect the document parsing from that point forward.
+
+=item test-statement := data-transform space+ operator space+ data-transform eol
+
+A test statement is a declaration of a testing operation. A typical statement
+looks like:
+
+    input-name.transform1().transform2(arguments) == expected-output-name
+
+=item include-statement := '%include' space+ relative-file-path eol
+
+An include statement causes the named relative file to be read. The file
+contents replace the include statement and are immediately parsed.
+
+=item space := SPACE-CHAR | TAB-CHAR
+
+A I<space> token is a normal space character or a tab character.
+
+=item eol := space+ CARRIAGE-RETURN? NEWLINE
+
+The I<eol> token is a Unix or DOS line ending.
+
+=item data-section := testml-data-section | yaml-data-section | json-data-section | xml-data-section
+
+The data section defines a sequence of data objects, each of which consists of
+a short description phrase and a set of named data points.
+
+TestML defines a default syntax, but this section can also be specified in
+YAML, JSON or XML.
+
+=item testml-data-section := testml-data-block-marker space+ rest
+
+The I<TestML data section> starts when the data block marker is detected at
+the beginning of a line and continues to the end of the file. This section is
+parsed into I<data block> objects
+
+=item yaml-data-section :=  '---' whitespace rest
+
+=item json-data-section :=  '[' rest
+
+=item xml-data-section :=  '<' rest
+
+=item rest := ANY-CHAR+
+
+The I<rest> token is simply the remainder of the text in the file. The I<data
+sections> are all parsed by separate parsers/grammars.
+
+=back
+
+=head2 TestML Data Section Grammar
+
+=over
+
+=item data-section
+
+=back
+
+=head1 Authors
+
+TestML Version 1.0 was created by Ingy döt Net <ingy@ingy.net>
+
+=head1 Copyright
+
+Copyright (c) 2009. Ingy döt Net.
+
+This program is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+See http://www.perl.com/perl/misc/Artistic.html
+
+=cut
