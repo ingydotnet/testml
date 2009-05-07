@@ -1,8 +1,13 @@
-=encoding utf-8
-
 =head1 TestML
 
 A Software Testing Meta Language. Version 1.0.
+
+=head1 Status
+
+Working Draft - 7 May, 2009
+
+This document is not the final 1.0 release. It is very new and under
+review.
 
 =head1 Overview
 
@@ -17,8 +22,9 @@ the exact same tests. However, TestML's clarity and ease of use may make
 it desirable for testing all types of software.
 
 TestML documents define a set of data points and a very abstract set of
-transformations that turn one set of points to match the expected result
-point. Here is a very simple example:
+transforms that invoke the application being tested to turn a given data
+point into a form that matches the expected result point. Here is a very
+simple example:
 
     testml: 1.0
     input.uppercase() == output
@@ -33,7 +39,7 @@ In this case, a programmer of any given language would do the following:
 =item * Implement a library "Foo" that can turn strings to upper case.
 
 =item * Implement a TestML "bridge class" that defines the 'uppercase'
-transform to invoke the Foo upper casing facility.
+transform to invoke the Foo library's upper casing facility.
 
 =item * Set up their test environment to use TestML to run the test.
 
@@ -50,7 +56,7 @@ authors (where everything is in text files).
 
 The specifics of TestML, and the data format specifically, evolved
 directly from Ingy döt Net's Perl data-driven testing framework,
-Test::Base. Test::Base was written in 2004 and later ported to
+B<Test::Base>. Test::Base was written in 2004 and later ported to
 JavaScript. As Ingy ported various libraries to other languages, he
 realized the potential value of having the test suites be reusable.
 
@@ -67,14 +73,6 @@ environment, or testing framework it will be used in. In this way, the exact
 same corpus of test documents can be used against multiple implementations
 of equivalent software.
 
-=item Ease of Implementation
-
-TestML is designed to be fairly easy to implement in various programming
-languages.
-
-The TestML project has a set of tests (written in TestML) that a TestML
-implementation must pass to be compliant. See L<http://testml.org/tests/>.
-
 =item Readability
 
 TestML lets you define tests that are both easy for you and others to
@@ -89,6 +87,14 @@ evolve to meet many various testing requirements. For this reason, every
 document requires a TestML version number. Also the original grammar has
 been made quite strict, leaving a lot of room for future extension.
 
+=item Ease of Implementation
+
+TestML is designed to be fairly easy to implement in various programming
+languages.
+
+The TestML project has a set of tests (written in TestML) that a TestML
+implementation must pass to be compliant. See L<http://testml.org/tests/>.
+
 =back
 
 =head1 Terminology
@@ -97,6 +103,10 @@ TestML uses a number of specific terms. This glossary lists and defines their
 meanings.
 
 =over
+
+=item Application
+
+The software that is being tested.
 
 =item Assertion
 
@@ -114,9 +124,9 @@ points> needed by the assertion.
 
 =item Bridge
 
-Every test setup defines a class that connects named transformations to
-the software being tested. This is known as a I<bridge class>, because
-it bridges the test to the application or library.
+Every test setup defines a class that connects named I<data transforms>
+to the software being tested. This is known as a I<bridge class>,
+because it bridges the test to the application or library.
 
 =item Document
 
@@ -142,6 +152,11 @@ an exact match.
 A I<data point> is a named piece of data that belongs to a given I<data
 block>. All data points are assumed to start out as unicode strings,
 although a I<data transform> may turn them into anything else.
+
+=item Runner
+
+The TestML class that is responsible for running all the
+appropriate tests.
 
 =item Section
 
@@ -242,13 +257,61 @@ YAML, JSON or XML.
 
 The I<TestML data section> starts when the data block marker is detected at
 the beginning of a line and continues to the end of the file. This section is
-parsed into I<data block> objects
+parsed into I<data block> objects.
+
+Here is an example data section in TestML:
+
+    === Test one
+    --- input: abc
+    --- output: 123
+    === Test two
+    --- input: xyz
+    --- output: 321
+
+See L<TestML Data Section Grammar> for the more formal syntax grammar of
+this format.
 
 =item yaml-data-section :=  '---' whitespace rest
 
+Here is an example data section in YAML:
+
+    ---
+    - __name__: Test one
+      input: abc
+      output: 123
+    - __name__: Test two
+      input: xyz
+      output: 321
+
 =item json-data-section :=  '[' rest
 
+Here is an example data section in JSON:
+
+    [
+      {
+        "__name__": "Test one",
+        "input": "abc",
+        "output": "123"
+      },
+      {
+        "__name__": "Test two",
+        "input": "xyz",
+        "output": "321"
+      }
+    ]
+
 =item xml-data-section :=  '<' rest
+
+    <testml>
+      <block name="Test one">
+        <input>abc</input>
+        <output>123</output>
+      </block>
+      <block name="Test two">
+        "input": "xyz",
+        "output": "321"
+      </block>
+    </testml>
 
 =item rest := ANY-CHAR+
 
@@ -261,7 +324,19 @@ sections> are all parsed by separate parsers/grammars.
 
 =over
 
-=item data-section
+=item data-section := data-block*
+
+=item data-block := block-header line* data-point*
+
+=item block-header := block-marker space+ block-name eol
+
+=item data-point := lines-point | phrase-point
+
+=item lines-point := point-marker point-name eol line*
+
+=item phrase-point := point-marker point-name ':' space+ NON-BREAK-CHAR* eol
+
+=item line := NON-BREAK-CHAR* eol
 
 =back
 
