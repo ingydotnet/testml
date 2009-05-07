@@ -1,13 +1,13 @@
-<?xml version="1.0" ?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
-<head>
-<title>TestML</title>
-<meta http-equiv="content-type" content="text/html; charset=utf-8" />
-<link rev="made" href="mailto:ingy@host209.ph.iit.edu" />
-</head>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+    <title>TestML - Testing Meta Language</title>
+    <link href="../css/general.css" rel="stylesheet" type="text/css">
+  <head>
+  <body>
 
-<body style="background-color: white">
 
 
 <!-- INDEX BEGIN -->
@@ -17,6 +17,7 @@
 <ul>
 
 	<li><a href="#testml">TestML</a></li>
+	<li><a href="#status">Status</a></li>
 	<li><a href="#overview">Overview</a></li>
 	<li><a href="#history">History</a></li>
 	<li><a href="#design_goals">Design Goals</a></li>
@@ -38,9 +39,15 @@
 
 <p>
 </p>
-<hr />
 <h1><a name="testml">TestML</a></h1>
 <p>A Software Testing Meta Language. Version 1.0.</p>
+<p>
+</p>
+<hr />
+<h1><a name="status">Status</a></h1>
+<p>Working Draft - 7 May, 2009</p>
+<p>This document is not the final 1.0 release. It is very new and under
+review.</p>
 <p>
 </p>
 <hr />
@@ -54,8 +61,9 @@ same language. In these scenarios, the different implementations all use
 the exact same tests. However, TestML's clarity and ease of use may make
 it desirable for testing all types of software.</p>
 <p>TestML documents define a set of data points and a very abstract set of
-transformations that turn one set of points to match the expected result
-point. Here is a very simple example:</p>
+transforms that invoke the application being tested to turn a given data
+point into a form that matches the expected result point. Here is a very
+simple example:</p>
 <pre>
     testml: 1.0
     input.uppercase() == output
@@ -66,8 +74,8 @@ point. Here is a very simple example:</p>
 <ul>
 <li><strong><a name="implement_a_library_foo_that_can_turn_strings_to_upper_case" class="item">Implement a library &quot;Foo&quot; that can turn strings to upper case.</a></strong>
 
-<li><strong><a name="implement_a_testml_bridge_class_that_defines_the_uppercase_transform_to_invoke_the_foo_upper_casing_facility" class="item">Implement a TestML &quot;bridge class&quot; that defines the 'uppercase'
-transform to invoke the Foo upper casing facility.</a></strong>
+<li><strong><a name="implement_a_testml_bridge_class_that_defines_the_uppercase_transform_to_invoke_the_foo_library_s_upper_casing_facility" class="item">Implement a TestML &quot;bridge class&quot; that defines the 'uppercase'
+transform to invoke the Foo library's upper casing facility.</a></strong>
 
 <li><strong><a name="set_up_their_test_environment_to_use_testml_to_run_the_test" class="item">Set up their test environment to use TestML to run the test.</a></strong>
 
@@ -84,7 +92,7 @@ spreadsheets are heavily used), and TestML caters to open source library
 authors (where everything is in text files).</p>
 <p>The specifics of TestML, and the data format specifically, evolved
 directly from Ingy döt Net's Perl data-driven testing framework,
-Test::Base. Test::Base was written in 2004 and later ported to
+<strong>Test::Base</strong>. Test::Base was written in 2004 and later ported to
 JavaScript. As Ingy ported various libraries to other languages, he
 realized the potential value of having the test suites be reusable.</p>
 <p>
@@ -100,17 +108,6 @@ realized the potential value of having the test suites be reusable.</p>
 environment, or testing framework it will be used in. In this way, the exact
 same corpus of test documents can be used against multiple implementations
 of equivalent software.</p>
-</dd>
-</li>
-<dt><strong><a name="ease_of_implementation" class="item">Ease of Implementation</a></strong>
-
-<dd>
-<p>TestML is designed to be fairly easy to implement in various programming
-languages.</p>
-</dd>
-<dd>
-<p>The TestML project has a set of tests (written in TestML) that a TestML
-implementation must pass to be compliant. See <a href="http://testml.org/tests/">http://testml.org/tests/</a>.</p>
 </dd>
 </li>
 <dt><strong><a name="readability" class="item">Readability</a></strong>
@@ -131,6 +128,17 @@ document requires a TestML version number. Also the original grammar has
 been made quite strict, leaving a lot of room for future extension.</p>
 </dd>
 </li>
+<dt><strong><a name="ease_of_implementation" class="item">Ease of Implementation</a></strong>
+
+<dd>
+<p>TestML is designed to be fairly easy to implement in various programming
+languages.</p>
+</dd>
+<dd>
+<p>The TestML project has a set of tests (written in TestML) that a TestML
+implementation must pass to be compliant. See <a href="http://testml.org/tests/">http://testml.org/tests/</a>.</p>
+</dd>
+</li>
 </dl>
 <p>
 </p>
@@ -139,6 +147,12 @@ been made quite strict, leaving a lot of room for future extension.</p>
 <p>TestML uses a number of specific terms. This glossary lists and defines their
 meanings.</p>
 <dl>
+<dt><strong><a name="application" class="item">Application</a></strong>
+
+<dd>
+<p>The software that is being tested.</p>
+</dd>
+</li>
 <dt><strong><a name="assertion" class="item">Assertion</a></strong>
 
 <dd>
@@ -160,9 +174,9 @@ points</em> needed by the assertion.</p>
 <dt><strong><a name="bridge" class="item">Bridge</a></strong>
 
 <dd>
-<p>Every test setup defines a class that connects named transformations to
-the software being tested. This is known as a <em>bridge class</em>, because
-it bridges the test to the application or library.</p>
+<p>Every test setup defines a class that connects named <em>data transforms</em>
+to the software being tested. This is known as a <em>bridge class</em>,
+because it bridges the test to the application or library.</p>
 </dd>
 </li>
 <dt><strong><a name="document" class="item">Document</a></strong>
@@ -196,6 +210,13 @@ an exact match.</p>
 <p>A <em>data point</em> is a named piece of data that belongs to a given <em>data
 block</em>. All data points are assumed to start out as unicode strings,
 although a <em>data transform</em> may turn them into anything else.</p>
+</dd>
+</li>
+<dt><strong><a name="runner" class="item">Runner</a></strong>
+
+<dd>
+<p>The TestML class that is responsible for running all the
+appropriate tests.</p>
 </dd>
 </li>
 <dt><strong><a name="section" class="item">Section</a></strong>
@@ -327,15 +348,77 @@ YAML, JSON or XML.</p>
 <dd>
 <p>The <em>TestML data section</em> starts when the data block marker is detected at
 the beginning of a line and continues to the end of the file. This section is
-parsed into <em>data block</em> objects</p>
+parsed into <em>data block</em> objects.</p>
+</dd>
+<dd>
+<p>Here is an example data section in TestML:</p>
+</dd>
+<dd>
+<pre>
+    === Test one
+    --- input: abc
+    --- output: 123
+    === Test two
+    --- input: xyz
+    --- output: 321</pre>
+</dd>
+<dd>
+<p>See <a href="#testml_data_section_grammar">TestML Data Section Grammar</a> for the more formal syntax grammar of
+this format.</p>
 </dd>
 </li>
 <dt><strong><a name="yaml_data_section_whitespace_rest" class="item">yaml-data-section :=  '---' whitespace rest</a></strong>
 
+<dd>
+<p>Here is an example data section in YAML:</p>
+</dd>
+<dd>
+<pre>
+    ---
+    - __name__: Test one
+      input: abc
+      output: 123
+    - __name__: Test two
+      input: xyz
+      output: 321</pre>
+</dd>
+</li>
 <dt><strong><a name="json_data_section_rest" class="item">json-data-section :=  '[' rest</a></strong>
 
+<dd>
+<p>Here is an example data section in JSON:</p>
+</dd>
+<dd>
+<pre>
+    [
+      {
+        &quot;__name__&quot;: &quot;Test one&quot;,
+        &quot;input&quot;: &quot;abc&quot;,
+        &quot;output&quot;: &quot;123&quot;
+      },
+      {
+        &quot;__name__&quot;: &quot;Test two&quot;,
+        &quot;input&quot;: &quot;xyz&quot;,
+        &quot;output&quot;: &quot;321&quot;
+      }
+    ]</pre>
+</dd>
+</li>
 <dt><strong><a name="xml_data_section_rest" class="item">xml-data-section :=  '&lt;' rest</a></strong>
 
+<dd>
+<pre>
+    &lt;testml&gt;
+      &lt;block name=&quot;Test one&quot;&gt;
+        &lt;input&gt;abc&lt;/input&gt;
+        &lt;output&gt;123&lt;/output&gt;
+      &lt;/block&gt;
+      &lt;block name=&quot;Test two&quot;&gt;
+        &quot;input&quot;: &quot;xyz&quot;,
+        &quot;output&quot;: &quot;321&quot;
+      &lt;/block&gt;
+    &lt;/testml&gt;</pre>
+</dd>
 <dt><strong><a name="rest_any_char" class="item">rest := ANY-CHAR+</a></strong>
 
 <dd>
@@ -348,7 +431,19 @@ sections</em> are all parsed by separate parsers/grammars.</p>
 </p>
 <h2><a name="testml_data_section_grammar">TestML Data Section Grammar</a></h2>
 <dl>
-<dt><strong><a name="data_section" class="item">data-section</a></strong>
+<dt><strong><a name="data_section_data_block" class="item">data-section := data-block*</a></strong>
+
+<dt><strong><a name="data_block_block_header_line_data_point" class="item">data-block := block-header line* data-point*</a></strong>
+
+<dt><strong><a name="block_header_block_marker_space_block_name_eol" class="item">block-header := block-marker space+ block-name eol</a></strong>
+
+<dt><strong><a name="data_point_lines_point_phrase_point" class="item">data-point := lines-point | phrase-point</a></strong>
+
+<dt><strong><a name="lines_point_point_marker_point_name_eol_line" class="item">lines-point := point-marker point-name eol line*</a></strong>
+
+<dt><strong><a name="phrase_point_point_marker_point_name_space_non_break_char_eol" class="item">phrase-point := point-marker point-name ':' space+ NON-BREAK-CHAR* eol</a></strong>
+
+<dt><strong><a name="line_non_break_char_eol" class="item">line := NON-BREAK-CHAR* eol</a></strong>
 
 </dl>
 <p>
@@ -365,6 +460,7 @@ sections</em> are all parsed by separate parsers/grammars.</p>
 under the same terms as Perl itself.</p>
 <p>See <a href="http://www.perl.com/perl/misc/Artistic.html">http://www.perl.com/perl/misc/Artistic.html</a></p>
 
-</body>
 
+  </body>
 </html>
+
