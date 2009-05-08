@@ -2,6 +2,7 @@ all: index.html
 
 index.html: index.html.tt2
 	tt-render --path=.:../template --data=config.yaml $< > $@
+	rm $<
 
 index.html.tt2: spec-1.0.pod
 	pod2html $< > $@.tmp 2> /dev/null
