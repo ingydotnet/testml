@@ -14,3 +14,14 @@ clean:
 
 open: index.html
 	open $<
+
+publish:
+	git co master
+	git push
+	git co gh-pages
+	git merge master
+	make all
+	make clean
+	git commit -a -m 'Publish latest spec'
+	git push
+	git co master

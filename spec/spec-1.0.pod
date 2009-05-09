@@ -4,10 +4,10 @@ A Software Testing Meta Language. Version 1.0.
 
 =head1 Status
 
-Working Draft - 7 May, 2009
+Working Draft - 9 May, 2009
 
 This document is not the final 1.0 release. It is very new and under
-review.
+review, initial implementation and testing.
 
 =head1 Overview
 
@@ -17,14 +17,14 @@ software is written in.
 
 It is primarily intended for generic libraries or modules that are
 relevant in many languages, or that have multiple implementations in the
-same language. In these scenarios the different implementations all use
-the exact same tests. However, TestML's clarity and ease of use may make
-it desirable for testing all types of software.
+same language. In these scenarios the different implementations can all
+use the exact same tests. However, TestML's clarity and ease of use may
+make it desirable for testing all types of software.
 
 TestML documents define a set of data points and an abstract set of
-transforms that invoke the application being tested to turn a given data
-point into a form that matches the expected result point. Here is a
-simple example:
+transforms that invoke the application being tested to turn given data
+points into states that assertions can be made against expected result
+points. Here is a simple example:
 
     testml: 1.0
     input.uppercase() == output
@@ -55,7 +55,7 @@ spreadsheets are heavily used), while TestML caters to open source library
 authors (where everything is in text files).
 
 The specifics of TestML, and the data format specifically, evolved
-directly from Ingy döt Net's Perl data-driven testing framework,
+directly from Ingy döt Net's data-driven Perl testing framework,
 B<Test::Base>. Test::Base was written in 2004 and later ported to
 JavaScript. As Ingy ported various libraries to other languages, he
 realized the potential value of having the test suites be reusable.
@@ -119,7 +119,7 @@ been passed through a set of I<data transforms>.
 A I<data block> is an object that contains a set of named I<data
 points>. The block usually has a short description phrase. When the
 tests are run, the I<runner class> will run each of the I<test
-assertions> against each of the I<data blocks> that contains the I<data
+assertions> against each of the I<data blocks> that contain the I<data
 points> needed by the assertion.
 
 =item Bridge
@@ -142,10 +142,9 @@ that the test code can later access.
 
 =item Operator
 
-A I<testing operator> is a method that compares the final state of
-two data points. The only operator currently currently defined by
-TestML is the '==' operator, which compares two unicode strings for
-an exact match.
+A I<testing operator> is a method that compares the final state of two
+data points. The only operator currently defined by TestML is the '=='
+operator, which compares two unicode strings for an exact match.
 
 =item Point
 
@@ -169,7 +168,7 @@ the I<data blocks> against which the test assertions are applied.
 
 A I<transform> is a method provided by a I<bridge class> that changes a
 I<data point> form one form into another. A transform usually invokes
-functionality of the application it is testing. The whole idea of
+functionality of the I<application> it is testing. The whole idea of
 TestML is that by passing a data point through one or more transforms,
 you can make it equivalent to some other data point, which causes the
 test to pass.
@@ -180,7 +179,7 @@ test to pass.
 
 To simplify the TestML Specification, it is defined as both a I<set of
 BNF grammars>, and a I<set of constraints>. The grammars include a I<top level
-document grammar> and a separate I<Testml data section grammar>. The data
+document grammar> and a separate I<TestML data section grammar>. The data
 section is separate, because it may be marked up in any of several syntaxes.
 
 =head2 Top Level Document Grammar
@@ -237,11 +236,18 @@ looks like:
 An include statement causes the named relative file to be read. The file
 contents replace the include statement and are immediately parsed.
 
+=item blank-line: space* eol
+
+=item comment := '#' line
+
+A comment is a line that begins with a '#'. A '#' anywhere else on a line will
+not start a comment.
+
 =item space := SPACE-CHAR | TAB-CHAR
 
 A I<space> token is a normal space character or a tab character.
 
-=item eol := space+ CARRIAGE-RETURN? NEWLINE
+=item eol := CARRIAGE-RETURN? NEWLINE
 
 The I<eol> token is a Unix or DOS line ending.
 
@@ -326,35 +332,114 @@ sections> are all parsed by separate parsers/grammars.
 
 =item data-section := data-block*
 
+A data section consists of 0-n data blocks.
+
 =item data-block := block-header line* data-point*
 
-=item block-header := block-marker space+ block-name eol
+A data block in TestML syntax looks like:
+
+    === Block Description
+    --- point1: phrase data
+    --- point2
+    line
+    data
+
+=item block-header := block-marker (space+ block-description)? space* eol
+
+A block header marks the start of a new block. The first one also marks the
+start of the data section. It contains an optional description.
+
+    === The next big test
+
+=item block-marker := '===' | meta.testml_block_marker
+
+A block marker is usually C<===>, but it is configurable via a meta
+statement, like this:
+
+    testml_block_marker: ***
 
 =item data-point := lines-point | phrase-point
 
-=item lines-point := point-marker point-name eol line*
+Data points are the pieces of raw data that TestML transforms and compares.
+They come in two flavors, lines and phrases.
 
-=item phrase-point := point-marker point-name ':' space+ NON-BREAK-CHAR* eol
+=item lines-point := point-marker point-name space* eol line*
+
+A "lines" data point is a string containing zero or more lines. If it has one
+or more lines it always ends with a newline.
+
+    --- lines
+    line1
+    line2 (3 is blank)
+    
+    line4
+
+=item phrase-point := point-marker point-name ':' space NON-BREAK-CHAR* eol blank-line*
+
+A "phrase" data point is a string with no newlines.
+
+    --- phrase: This string is one line with no newline at the end.
+
+=item point-marker := '---' | meta.testml_point_marker
+
+A block marker is usually C<--->, but it is configurable via a meta
+statement, like this:
+
+    testml_point_marker: +++
 
 =item line := NON-BREAK-CHAR* eol
 
+A line is a string of zero or more non break characters followed by
+a newline.
+
 =back
 
-=head1 Outstanding Issues
+=head1 TestML Document Constraints
 
-=item document encoding: How is unicode represented in the file? Presumably UTF-8.
+The above grammars define the valid syntax for a TestML document,
+but there is a set of constraints that all TestML documents should
+adhere to.
+
+=over
+
+=item Document Encoding
+
+All TestML documents are composed of the unicode character set and
+I<should> be encoded in UTF-8 for maximum portability.
+
+=item C<testml>
+
+The C<testml> meta statement is required and it must specify a version
+number. The TestML implementation can then determine whether or not it
+can process the document or not.
+
+For example:
+
+    testml: 1.0
+
+As a guideline, TestML will attempt to be backwards compatible with
+version numbers that have the same first number. So version 1.3 would be
+backwards compatible with 1.2, 1.1 and 1.0. Version 2.0 would probably
+break compatability.
+
+=back
 
 =head1 Authors
 
 TestML Version 1.0 was created by Ingy döt Net <ingy@ingy.net>
 
+The spec was reviewed and contributed to by the following people:
+
+=over
+
+=item Tony Bowden
+
+=item Chris Dent
+
+=back
+
 =head1 Copyright
 
 Copyright (c) 2009. Ingy döt Net.
-
-This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
-
-See http://www.perl.com/perl/misc/Artistic.html
 
 =cut
