@@ -62,15 +62,19 @@ same language. In these scenarios the different implementations can all
 use the exact same tests. However, TestML's clarity and ease of use may
 make it desirable for testing all types of software.</p>
 <p>TestML documents define a set of data points and an abstract set of
-transforms that invoke the application being tested to turn given data
-points into states that assertions can be made against expected result
-points. Here is a simple example:</p>
+transforms that invoke the application being tested. The transforms
+alter given data points into new states. Then assertions can be made
+between the altered data points and expected result data points. Here is
+a simple example:</p>
 <pre>
     testml: 1.0
     input.uppercase() == output
     === Test mixed case string
     --- input: I Like Pie
-    --- output: I LIKE PIE</pre>
+    --- output: I LIKE PIE
+    === Test lower case string
+    --- input: i love lucy
+    --- output: I LOVE LUCY</pre>
 <p>In this case, a programmer of any given language would do the following:</p>
 <ul>
 <li><strong><a name="implement_a_library_foo_that_can_turn_strings_to_upper_case" class="item">Implement a library &quot;Foo&quot; that can turn strings to upper case.</a></strong>
@@ -166,7 +170,7 @@ been passed through a set of <em>data transforms</em>.</p>
 
 <dd>
 <p>A <em>data block</em> is an object that contains a set of named <em>data
-points</em>. The block usually has a short labeli phrase. When the
+points</em>. The block usually has a short label phrase. When the
 tests are run, the <em>runner class</em> will run each of the <em>test
 assertions</em> against each of the <em>data blocks</em> that contain the <em>data
 points</em> needed by the assertion.</p>
@@ -313,6 +317,17 @@ looks like:</p>
     input-name.transform1().transform2(arguments) == expected-output-name</pre>
 </dd>
 </li>
+<dt><strong><a name="data_transform_point_name_transform_call" class="item">data-transform := point-name transform-call*</a></strong>
+
+<dd>
+<p>A data transform is a data point name followed by zero or more data
+transform calls.</p>
+</dd>
+</li>
+<dt><strong><a name="transform_call_transform_name_argument_list" class="item">transform-call := '.' transform-name '(' argument-list ')'</a></strong>
+
+<dt><strong><a name="string" class="item">argument-list := ( '' | ( quoted-string (',' space quoted-string)* ) )</a></strong>
+
 <dt><strong><a name="include_statement_include_space_relative_file_path_eol" class="item">include-statement := '%include' space relative-file-path eol</a></strong>
 
 <dd>
