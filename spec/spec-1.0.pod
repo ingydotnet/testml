@@ -22,15 +22,19 @@ use the exact same tests. However, TestML's clarity and ease of use may
 make it desirable for testing all types of software.
 
 TestML documents define a set of data points and an abstract set of
-transforms that invoke the application being tested to turn given data
-points into states that assertions can be made against expected result
-points. Here is a simple example:
+transforms that invoke the application being tested. The transforms
+alter given data points into new states. Then assertions can be made
+between the altered data points and expected result data points. Here is
+a simple example:
 
     testml: 1.0
     input.uppercase() == output
     === Test mixed case string
     --- input: I Like Pie
     --- output: I LIKE PIE
+    === Test lower case string
+    --- input: i love lucy
+    --- output: I LOVE LUCY
 
 In this case, a programmer of any given language would do the following:
 
@@ -117,7 +121,7 @@ been passed through a set of I<data transforms>.
 =item Block
 
 A I<data block> is an object that contains a set of named I<data
-points>. The block usually has a short labeli phrase. When the
+points>. The block usually has a short label phrase. When the
 tests are run, the I<runner class> will run each of the I<test
 assertions> against each of the I<data blocks> that contain the I<data
 points> needed by the assertion.
@@ -230,6 +234,15 @@ A test statement is a declaration of a testing operation. A typical statement
 looks like:
 
     input-name.transform1().transform2(arguments) == expected-output-name
+
+=item data-transform := point-name transform-call*
+
+A data transform is a data point name followed by zero or more data
+transform calls.
+
+=item transform-call := '.' transform-name '(' argument-list ')'
+
+=item argument-list := ( '' | ( quoted-string (',' space quoted-string)* ) )
 
 =item include-statement := '%include' space relative-file-path eol
 
