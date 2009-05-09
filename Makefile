@@ -1,4 +1,4 @@
-.PHONY: spec clean open
+.PHONY: spec clean open gh-clean
 
 all: index.html spec
 
@@ -12,16 +12,21 @@ clean:
 	rm -f index.html
 	make -C spec $@
 
+gh-clean:
+	make -C spec $@
+
 open: index.html
 	open $<
 
 publish:
-	git co master
+	git checkout master
 	git push
-	git co gh-pages
+	git checkout gh-pages
 	git merge master
 	make clean all
-	make clean
+	make gh-clean
+	git add .
+	git status
 	git commit -a -m 'Publish latest spec'
 	git push
-	git co master
+	git checkout master
