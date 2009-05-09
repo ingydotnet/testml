@@ -17,6 +17,7 @@ open: index.html
 
 publish:
 	git co master
+	git push
 	git co gh-pages
 	git merge master
 	make all
