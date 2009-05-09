@@ -1,3 +1,5 @@
+.PHONY: clean gh-clean
+
 all: index.html
 
 index.html: index.html.tt2
@@ -15,3 +17,5 @@ open: index.html
 clean:
 	rm -f index.html*
 
+gh-clean:
+	rm -f index.html.tt2
