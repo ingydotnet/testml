@@ -117,7 +117,7 @@ been passed through a set of I<data transforms>.
 =item Block
 
 A I<data block> is an object that contains a set of named I<data
-points>. The block usually has a short description phrase. When the
+points>. The block usually has a short labeli phrase. When the
 tests are run, the I<runner class> will run each of the I<test
 assertions> against each of the I<data blocks> that contain the I<data
 points> needed by the assertion.
@@ -219,9 +219,9 @@ is declaring (test statements).
 The parsing of the head section should instantiate two TestML objects: the
 Meta object and the Assertions object.
 
-=item meta-statement := keyword ':' space+ value eol
+=item meta-statement := keyword ':' space value eol
 
-Meta statements are key/value pairs separated by a colon and whitespace. A
+Meta statements are key/value pairs separated by a colon and a space. A
 given meta setting may affect the document parsing from that point forward.
 
 =item test-statement := data-transform space+ operator space+ data-transform eol
@@ -231,12 +231,12 @@ looks like:
 
     input-name.transform1().transform2(arguments) == expected-output-name
 
-=item include-statement := '%include' space+ relative-file-path eol
+=item include-statement := '%include' space relative-file-path eol
 
 An include statement causes the named relative file to be read. The file
 contents replace the include statement and are immediately parsed.
 
-=item blank-line: space* eol
+=item blank-line := space* eol
 
 =item comment := '#' line
 
@@ -254,12 +254,12 @@ The I<eol> token is a Unix or DOS line ending.
 =item data-section := testml-data-section | yaml-data-section | json-data-section | xml-data-section
 
 The data section defines a sequence of data objects, each of which consists of
-a short description phrase and a set of named data points.
+a short label phrase and a set of named data points.
 
 TestML defines a default syntax, but this section can also be specified in
 YAML, JSON or XML.
 
-=item testml-data-section := testml-data-block-marker space+ rest
+=item testml-data-section := testml-data-block-marker (space | eol) rest
 
 The I<TestML data section> starts when the data block marker is detected at
 the beginning of a line and continues to the end of the file. This section is
@@ -277,15 +277,15 @@ Here is an example data section in TestML:
 See L<TestML Data Section Grammar> for the more formal syntax grammar of
 this format.
 
-=item yaml-data-section :=  '---' whitespace rest
+=item yaml-data-section :=  '---' (space | eol) rest
 
 Here is an example data section in YAML:
 
     ---
-    - __name__: Test one
+    - -label: Test one
       input: abc
       output: 123
-    - __name__: Test two
+    - -label: Test two
       input: xyz
       output: 321
 
@@ -295,12 +295,12 @@ Here is an example data section in JSON:
 
     [
       {
-        "__name__": "Test one",
+        "-label: "Test one",
         "input": "abc",
         "output": "123"
       },
       {
-        "__name__": "Test two",
+        "-label: "Test two",
         "input": "xyz",
         "output": "321"
       }
@@ -309,11 +309,11 @@ Here is an example data section in JSON:
 =item xml-data-section :=  '<' rest
 
     <testml>
-      <block name="Test one">
+      <block label="Test one">
         <input>abc</input>
         <output>123</output>
       </block>
-      <block name="Test two">
+      <block label="Test two">
         "input": "xyz",
         "output": "321"
       </block>
@@ -338,16 +338,16 @@ A data section consists of 0-n data blocks.
 
 A data block in TestML syntax looks like:
 
-    === Block Description
+    === Block Label
     --- point1: phrase data
     --- point2
     line
     data
 
-=item block-header := block-marker (space+ block-description)? space* eol
+=item block-header := block-marker (space block-label)? space* eol
 
 A block header marks the start of a new block. The first one also marks the
-start of the data section. It contains an optional description.
+start of the data section. It contains an optional label.
 
     === The next big test
 
@@ -432,9 +432,9 @@ The spec was reviewed and contributed to by the following people:
 
 =over
 
-=item Tony Bowden
+=item * Tony Bowden
 
-=item Chris Dent
+=item * Chris Dent
 
 =back
 
