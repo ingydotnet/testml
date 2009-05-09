@@ -166,7 +166,7 @@ been passed through a set of <em>data transforms</em>.</p>
 
 <dd>
 <p>A <em>data block</em> is an object that contains a set of named <em>data
-points</em>. The block usually has a short description phrase. When the
+points</em>. The block usually has a short labeli phrase. When the
 tests are run, the <em>runner class</em> will run each of the <em>test
 assertions</em> against each of the <em>data blocks</em> that contain the <em>data
 points</em> needed by the assertion.</p>
@@ -295,10 +295,10 @@ is declaring (test statements).</p>
 Meta object and the Assertions object.</p>
 </dd>
 </li>
-<dt><strong><a name="meta_statement_keyword_space_value_eol" class="item">meta-statement := keyword ':' space+ value eol</a></strong>
+<dt><strong><a name="meta_statement_keyword_space_value_eol" class="item">meta-statement := keyword ':' space value eol</a></strong>
 
 <dd>
-<p>Meta statements are key/value pairs separated by a colon and whitespace. A
+<p>Meta statements are key/value pairs separated by a colon and a space. A
 given meta setting may affect the document parsing from that point forward.</p>
 </dd>
 </li>
@@ -313,14 +313,14 @@ looks like:</p>
     input-name.transform1().transform2(arguments) == expected-output-name</pre>
 </dd>
 </li>
-<dt><strong><a name="include_statement_include_space_relative_file_path_eol" class="item">include-statement := '%include' space+ relative-file-path eol</a></strong>
+<dt><strong><a name="include_statement_include_space_relative_file_path_eol" class="item">include-statement := '%include' space relative-file-path eol</a></strong>
 
 <dd>
 <p>An include statement causes the named relative file to be read. The file
 contents replace the include statement and are immediately parsed.</p>
 </dd>
 </li>
-<dt><strong><a name="blank_line_space_eol" class="item">blank-line: space* eol</a></strong>
+<dt><strong><a name="blank_line_space_eol" class="item">blank-line := space* eol</a></strong>
 
 <dt><strong><a name="comment_line" class="item">comment := '#' line</a></strong>
 
@@ -345,14 +345,14 @@ not start a comment.</p>
 
 <dd>
 <p>The data section defines a sequence of data objects, each of which consists of
-a short description phrase and a set of named data points.</p>
+a short label phrase and a set of named data points.</p>
 </dd>
 <dd>
 <p>TestML defines a default syntax, but this section can also be specified in
 YAML, JSON or XML.</p>
 </dd>
 </li>
-<dt><strong><a name="testml_data_section_testml_data_block_marker_space_rest" class="item">testml-data-section := testml-data-block-marker space+ rest</a></strong>
+<dt><strong><a name="marker" class="item">testml-data-section := testml-data-block-marker (space | eol) rest</a></strong>
 
 <dd>
 <p>The <em>TestML data section</em> starts when the data block marker is detected at
@@ -376,7 +376,7 @@ parsed into <em>data block</em> objects.</p>
 this format.</p>
 </dd>
 </li>
-<dt><strong><a name="yaml_data_section_whitespace_rest" class="item">yaml-data-section :=  '---' whitespace rest</a></strong>
+<dt><strong><a name="yaml_data_section_space_eol_rest" class="item">yaml-data-section :=  '---' (space | eol) rest</a></strong>
 
 <dd>
 <p>Here is an example data section in YAML:</p>
@@ -384,10 +384,10 @@ this format.</p>
 <dd>
 <pre>
     ---
-    - __name__: Test one
+    - -label: Test one
       input: abc
       output: 123
-    - __name__: Test two
+    - -label: Test two
       input: xyz
       output: 321</pre>
 </dd>
@@ -401,12 +401,12 @@ this format.</p>
 <pre>
     [
       {
-        &quot;__name__&quot;: &quot;Test one&quot;,
+        &quot;-label: &quot;Test one&quot;,
         &quot;input&quot;: &quot;abc&quot;,
         &quot;output&quot;: &quot;123&quot;
       },
       {
-        &quot;__name__&quot;: &quot;Test two&quot;,
+        &quot;-label: &quot;Test two&quot;,
         &quot;input&quot;: &quot;xyz&quot;,
         &quot;output&quot;: &quot;321&quot;
       }
@@ -418,11 +418,11 @@ this format.</p>
 <dd>
 <pre>
     &lt;testml&gt;
-      &lt;block name=&quot;Test one&quot;&gt;
+      &lt;block label=&quot;Test one&quot;&gt;
         &lt;input&gt;abc&lt;/input&gt;
         &lt;output&gt;123&lt;/output&gt;
       &lt;/block&gt;
-      &lt;block name=&quot;Test two&quot;&gt;
+      &lt;block label=&quot;Test two&quot;&gt;
         &quot;input&quot;: &quot;xyz&quot;,
         &quot;output&quot;: &quot;321&quot;
       &lt;/block&gt;
@@ -453,18 +453,18 @@ sections</em> are all parsed by separate parsers/grammars.</p>
 </dd>
 <dd>
 <pre>
-    === Block Description
+    === Block Label
     --- point1: phrase data
     --- point2
     line
     data</pre>
 </dd>
 </li>
-<dt><strong><a name="marker" class="item">block-header := block-marker (space+ block-description)? space* eol</a></strong>
+<dt><strong>block-header := block-marker (space block-label)? space* eol</strong>
 
 <dd>
 <p>A block header marks the start of a new block. The first one also marks the
-start of the data section. It contains an optional description.</p>
+start of the data section. It contains an optional label.</p>
 </dd>
 <dd>
 <pre>
@@ -576,12 +576,12 @@ break compatability.</p>
 <h1><a name="authors">Authors</a></h1>
 <p>TestML Version 1.0 was created by Ingy döt Net &lt;<a href="mailto:ingy@ingy.net">ingy@ingy.net</a>&gt;</p>
 <p>The spec was reviewed and contributed to by the following people:</p>
-<dl>
-<dt><strong><a name="tony_bowden" class="item">Tony Bowden</a></strong>
+<ul>
+<li><strong><a name="tony_bowden" class="item">Tony Bowden</a></strong>
 
-<dt><strong><a name="chris_dent" class="item">Chris Dent</a></strong>
+<li><strong><a name="chris_dent" class="item">Chris Dent</a></strong>
 
-</dl>
+</ul>
 <p>
 </p>
 <hr />
