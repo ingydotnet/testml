@@ -20,7 +20,7 @@ publish:
 	git push
 	git co gh-pages
 	git merge master
-	make all
+	make clean all
 	make clean
 	git commit -a -m 'Publish latest spec'
 	git push
