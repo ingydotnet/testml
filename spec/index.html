@@ -27,13 +27,14 @@
 
 		<li><a href="#top_level_document_grammar">Top Level Document Grammar</a></li>
 		<li><a href="#testml_data_section_grammar">TestML Data Section Grammar</a></li>
-	</ul>
+		<li><a href="#testml_document_constraints">TestML Document Constraints</a></li>
+		<ul>
 
-	<li><a href="#testml_document_constraints">TestML Document Constraints</a></li>
-	<ul>
+			<li><a href="#document_encoding">Document Encoding</a></li>
+			<li><a href="#valid_meta_keywords">Valid Meta Keywords</a></li>
+			<li><a href="#include_files">Include Files</a></li>
+		</ul>
 
-		<li><a href="#document_encoding">Document Encoding</a></li>
-		<li><a href="#valid_meta_keywords">Valid Meta Keywords</a></li>
 	</ul>
 
 	<li><a href="#outsanding_issues">Outsanding Issues</a></li>
@@ -203,7 +204,7 @@ of such a document.</p>
 <dt><strong><a name="meta" class="item">Meta</a></strong>
 
 <dd>
-<p>A <em>TestML document</em> can define any number of key/value pairs which are
+<p>A <em>TestML document</em> can define a number of key/value pairs which are
 considered <em>meta data</em> and are used to instantiate a <em>meta object</em>
 that the test code can later access.</p>
 </dd>
@@ -383,6 +384,12 @@ strings. The list can be empty and usually is.</p>
 </li>
 <dt><strong><a name="argument_point_name_quoted_string" class="item">argument := point-name | quoted-string</a></strong>
 
+<dd>
+<p>An argument passed to a transform call can be a data point name or a
+quoted string. If it is a point name, the original value of that data
+point will be passed to the transform when the test is run.</p>
+</dd>
+</li>
 <dt><strong><a name="quoted_string_single_quoted_string_double_quoted_string" class="item">quoted-string := single-quoted-string | double-quoted-string</a></strong>
 
 <dd>
@@ -640,19 +647,18 @@ a newline.</p>
 </dl>
 <p>
 </p>
-<hr />
-<h1><a name="testml_document_constraints">TestML Document Constraints</a></h1>
+<h2><a name="testml_document_constraints">TestML Document Constraints</a></h2>
 <p>The above grammars define the valid syntax for a TestML document,
 but there is a set of constraints that all TestML documents should
 adhere to.</p>
 <p>
 </p>
-<h2><a name="document_encoding">Document Encoding</a></h2>
+<h3><a name="document_encoding">Document Encoding</a></h3>
 <p>All TestML documents are composed of the unicode character set and
 <em>must</em> be encoded in UTF8.</p>
 <p>
 </p>
-<h2><a name="valid_meta_keywords">Valid Meta Keywords</a></h2>
+<h3><a name="valid_meta_keywords">Valid Meta Keywords</a></h3>
 <dl>
 <dt><strong><a name="testml_required" class="item">testml - <strong>required</strong></a></strong>
 
@@ -687,28 +693,28 @@ implementation may complain or throw an error.</p>
     tests: 13</pre>
 </dd>
 </li>
-<dt><strong><a name="testml_block_marker" class="item">testml_block_marker</a></strong>
+<dt><strong><a name="testml_block_marker_optional" class="item">testml_block_marker - <em>optional</em></a></strong>
 
 <dd>
-<p>If you choose to use the TestML data markup to encode your data section, you
-can choose the character sequence to replace the default ('==='). You would
-wnat to do this primarily if you had '===' at the beginning of a line in your
-data.</p>
+<p>If you choose to use the TestML data markup to encode your data section,
+you can choose the character sequence to replace the default ('===').
+You would wnat to do this primarily if you had '===' at the beginning of
+a line in your data.</p>
 </dd>
 <dd>
-<p>Setting this option changes the parser to look for the specified pattern to
-find the start of the data section.</p>
+<p>Setting this option changes the parser to look for the specified pattern
+to find the start of the data section.</p>
 </dd>
 <dd>
 <pre>
     testml_block_marker: *=*</pre>
 </dd>
 </li>
-<dt><strong><a name="testml_point_marker" class="item">testml_point_marker</a></strong>
+<dt><strong><a name="testml_point_marker_optional" class="item">testml_point_marker - <em>optional</em></a></strong>
 
 <dd>
-<p>This option is the same as the testml_block_marker option above, except it is
-for the data point marker.</p>
+<p>This option is the same as the testml_block_marker option above, except
+it is for the data point marker.</p>
 </dd>
 <dd>
 <pre>
@@ -718,15 +724,9 @@ for the data point marker.</p>
 </dl>
 <p>
 </p>
-<hr />
-<h1><a name="outsanding_issues">Outsanding Issues</a></h1>
-<ul>
-<li><strong><a name="include" class="item">Include</a></strong>
-
-<p>Need to determine if '%include' is allowed in the data section. If so it
-would require an escape mechanism to allow it as actual data.</p>
-</li>
-</ul>
+<h3><a name="include_files">Include Files</a></h3>
+<p>Files are included by a relative path. If the file does not exist, and
+thus can not be included, it must be considered an error.</p>
 <p>
 </p>
 <hr />
