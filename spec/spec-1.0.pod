@@ -140,7 +140,7 @@ of such a document.
 
 =item Meta
 
-A I<TestML document> can define any number of key/value pairs which are
+A I<TestML document> can define a number of key/value pairs which are
 considered I<meta data> and are used to instantiate a I<meta object>
 that the test code can later access.
 
@@ -275,7 +275,9 @@ strings. The list can be empty and usually is.
 
 =item argument := point-name | quoted-string
 
-
+An argument passed to a transform call can be a data point name or a
+quoted string. If it is a point name, the original value of that data
+point will be passed to the transform when the test is run.
 
 =item quoted-string := single-quoted-string | double-quoted-string
 
@@ -464,18 +466,18 @@ a newline.
 
 =back
 
-=head1 TestML Document Constraints
+=head2 TestML Document Constraints
 
 The above grammars define the valid syntax for a TestML document,
 but there is a set of constraints that all TestML documents should
 adhere to.
 
-=head2 Document Encoding
+=head3 Document Encoding
 
 All TestML documents are composed of the unicode character set and
 I<must> be encoded in UTF8.
 
-=head2  Valid Meta Keywords
+=head3  Valid Meta Keywords
 
 =over
 
@@ -502,26 +504,33 @@ implementation may complain or throw an error.
 
     tests: 13
 
-=item testml_block_marker
+=item testml_block_marker - I<optional>
 
-If you choose to use the TestML data markup to encode your data section, you
-can choose the character sequence to replace the default ('==='). You would
-wnat to do this primarily if you had '===' at the beginning of a line in your
-data.
+If you choose to use the TestML data markup to encode your data section,
+you can choose the character sequence to replace the default ('===').
+You would wnat to do this primarily if you had '===' at the beginning of
+a line in your data.
 
-Setting this option changes the parser to look for the specified pattern to
-find the start of the data section.
+Setting this option changes the parser to look for the specified pattern
+to find the start of the data section.
 
     testml_block_marker: *=*
 
-=item testml_point_marker
+=item testml_point_marker - I<optional>
 
-This option is the same as the testml_block_marker option above, except it is
-for the data point marker.
+This option is the same as the testml_block_marker option above, except
+it is for the data point marker.
 
     testml_point_marker: +++
 
 =back
+
+=head3 Include Files
+
+Files are included by a relative path. If the file does not exist, and
+thus can not be included, it must be considered an error.
+
+=begin comment
 
 =head1 Outsanding Issues
 
@@ -533,6 +542,8 @@ Need to determine if '%include' is allowed in the data section. If so it
 would require an escape mechanism to allow it as actual data.
 
 =back
+
+=end comment
 
 =head1 Authors
 

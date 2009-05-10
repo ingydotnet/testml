@@ -8,6 +8,6 @@ used to write data driven unit tests for software in any programming language.
 </p>
 
 <ul>
-<li><a href="spec/">The TestML version 1.0 Specification</a></li>
+<li><a href="spec/">The TestML 1.0 Specification</a></li>
 </ul>
 [% END %]
