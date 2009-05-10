@@ -4,7 +4,7 @@ A Software Testing Meta Language. Version 1.0.
 
 =head1 Status
 
-Working Draft - 9 May, 2009
+Working Draft - 10 May, 2009
 
 This document is not the final 1.0 release. It is very new and under
 review, initial implementation and testing.
@@ -220,18 +220,28 @@ The head section contains both general information (meta statements)
 about the test document and the definitions of the assertions the test
 is declaring (test statements).
 
-The parsing of the head section should instantiate two TestML objects: the
-Meta object and the Assertions object.
+The parsing of the head section should instantiate two TestML objects:
+the Meta object and the Assertions object.
 
 =item meta-statement := keyword ':' space value eol
 
-Meta statements are key/value pairs separated by a colon and a space. A
-given meta setting may affect the document parsing from that point forward.
+Meta statements are key/value pairs separated by a colon and a
+space. A given meta setting may affect the document parsing from
+that point forward.
+
+=item keyword := [a-z][a-z0-9_]*
+
+A keyword is the name of a meta setting. See Constraints for the
+valid values.
+
+=item value := NON-SPACE (NON-BREAK* NON-SPACE)?
+
+A value is a non blank, non empty, single line phrase of characters.
 
 =item test-statement := data-transform space+ operator space+ data-transform eol
 
-A test statement is a declaration of a testing operation. A typical statement
-looks like:
+A test statement is a declaration of a testing operation. A typical
+statement looks like:
 
     input-name.transform1().transform2(arguments) == expected-output-name
 
@@ -242,7 +252,15 @@ transform calls.
 
 =item transform-call := '.' transform-name '(' argument-list ')'
 
-=item argument-list := ( '' | ( quoted-string (',' space quoted-string)* ) )
+=item argument-list := ( quoted-string (',' space quoted-string)* )?
+
+=item quoted-string := single-quoted-string | double-quoted-string
+
+=item single-quoted-string :=
+    "'" ((ANY - (BREAK | '\' | "'")) | "\'" | '\\')* "'"
+
+=item double-quoted-string :=
+    '"' ((ANY - (BREAK | '\' | '"')) | '\"' | '\\' | '\n' | '\t')* '"'
 
 =item include-statement := '%include' space relative-file-path eol
 
@@ -253,10 +271,10 @@ contents replace the include statement and are immediately parsed.
 
 =item comment := '#' line
 
-A comment is a line that begins with a '#'. A '#' anywhere else on a line will
-not start a comment.
+A comment is a line that begins with a '#'. A '#' anywhere else on a
+line will not start a comment.
 
-=item space := SPACE-CHAR | TAB-CHAR
+=item space := SPACE | TAB
 
 A I<space> token is a normal space character or a tab character.
 
@@ -266,17 +284,17 @@ The I<eol> token is a Unix or DOS line ending.
 
 =item data-section := testml-data-section | yaml-data-section | json-data-section | xml-data-section
 
-The data section defines a sequence of data objects, each of which consists of
-a short label phrase and a set of named data points.
+The data section defines a sequence of data objects, each of which
+consists of a short label phrase and a set of named data points.
 
-TestML defines a default syntax, but this section can also be specified in
-YAML, JSON or XML.
+TestML defines a default syntax, but this section can also be specified
+in YAML, JSON or XML.
 
 =item testml-data-section := testml-data-block-marker (space | eol) rest
 
-The I<TestML data section> starts when the data block marker is detected at
-the beginning of a line and continues to the end of the file. This section is
-parsed into I<data block> objects.
+The I<TestML data section> starts when the data block marker is detected
+at the beginning of a line and continues to the end of the file. This
+section is parsed into I<data block> objects.
 
 Here is an example data section in TestML:
 
@@ -332,10 +350,10 @@ Here is an example data section in JSON:
       </block>
     </testml>
 
-=item rest := ANY-CHAR+
+=item rest := ANY+
 
-The I<rest> token is simply the remainder of the text in the file. The I<data
-sections> are all parsed by separate parsers/grammars.
+The I<rest> token is simply the remainder of the text in the file.
+The I<data sections> are all parsed by separate parsers/grammars.
 
 =back
 
@@ -359,8 +377,8 @@ A data block in TestML syntax looks like:
 
 =item block-header := block-marker (space block-label)? space* eol
 
-A block header marks the start of a new block. The first one also marks the
-start of the data section. It contains an optional label.
+A block header marks the start of a new block. The first one also marks
+the start of the data section. It contains an optional label.
 
     === The next big test
 
@@ -373,13 +391,13 @@ statement, like this:
 
 =item data-point := lines-point | phrase-point
 
-Data points are the pieces of raw data that TestML transforms and compares.
-They come in two flavors, lines and phrases.
+Data points are the pieces of raw data that TestML transforms and
+compares. They come in two flavors, lines and phrases.
 
 =item lines-point := point-marker point-name space* eol line*
 
-A "lines" data point is a string containing zero or more lines. If it has one
-or more lines it always ends with a newline.
+A "lines" data point is a string containing zero or more lines. If it
+has one or more lines it always ends with a newline.
 
     --- lines
     line1
@@ -387,7 +405,7 @@ or more lines it always ends with a newline.
     
     line4
 
-=item phrase-point := point-marker point-name ':' space NON-BREAK-CHAR* eol blank-line*
+=item phrase-point := point-marker point-name ':' space NON-BREAK* eol blank-line*
 
 A "phrase" data point is a string with no newlines.
 
@@ -400,7 +418,7 @@ statement, like this:
 
     testml_point_marker: +++
 
-=item line := NON-BREAK-CHAR* eol
+=item line := NON-BREAK* eol
 
 A line is a string of zero or more non break characters followed by
 a newline.
@@ -418,7 +436,7 @@ adhere to.
 =item Document Encoding
 
 All TestML documents are composed of the unicode character set and
-I<should> be encoded in UTF-8 for maximum portability.
+I<must> be encoded in UTF8.
 
 =item C<testml>
 
@@ -437,11 +455,23 @@ break compatability.
 
 =back
 
+=head1 Outsanding Issues
+
+=over
+
+=item * Include
+
+Need to determine if '%include' is allowed in the data section. If so it
+would require an escape mechanism to allow it as actual data.
+
+
+=back
+
 =head1 Authors
 
 TestML Version 1.0 was created by Ingy döt Net <ingy@ingy.net>
 
-The spec was reviewed and contributed to by the following people:
+The spec was reviewed and/or contributed to by the following people:
 
 =over
 
@@ -449,10 +479,20 @@ The spec was reviewed and contributed to by the following people:
 
 =item * Chris Dent
 
+=item * Yuval Kogman
+
 =back
 
 =head1 Copyright
 
 Copyright (c) 2009. Ingy döt Net.
+
+=head1 License
+
+This work is licensed under the Creative Commons Attribution Share Alike
+License. To view a copy of this license, visit
+L<http://creativecommons.org/licenses/by-sa/3.0/legalcode>;
+or, (b) send a letter to Creative Commons, 171 2nd Street, Suite 300,
+San Francisco, California, 94105, USA.
 
 =cut
