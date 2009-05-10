@@ -15,8 +15,8 @@ clean:
 gh-clean:
 	make -C spec $@
 
-open: index.html
-	open $<
+open: all
+	open index.html
 
 publish:
 	git checkout master
