@@ -6,8 +6,8 @@ A Software Testing Meta Language. Version 1.0.
 
 Working Draft - 10 May, 2009
 
-This document is not the final 1.0 release. It is very new and under
-review, initial implementation and testing.
+This document is not the final 1.0 release. It is very new, under
+review, and undergoing initial implementation and testing.
 
 =head1 Overview
 
@@ -243,24 +243,59 @@ A value is a non blank, non empty, single line phrase of characters.
 A test statement is a declaration of a testing operation. A typical
 statement looks like:
 
-    input-name.transform1().transform2(arguments) == expected-output-name
+    input-point.transform1().transform2(arguments) == expected-output-point
 
 =item data-transform := point-name transform-call*
 
 A data transform is a data point name followed by zero or more data
 transform calls.
 
+=item point-name := [A-Za-z][A-Za-z0-9_]*
+
+A point name is the name of a data point defined in the data section of
+the document.
+
 =item transform-call := '.' transform-name '(' argument-list ')'
 
-=item argument-list := ( quoted-string (',' space quoted-string)* )?
+A transform call is like a method call in Python. A '.' invokes a named
+transform/method with a list of arguments.
+
+    .transform_name()
+
+=item transform-name := [A-Za-z][A-Za-z0-9_]*
+
+A transform name is a like a method name in a programming language.
+
+    thisIsTheTransformName
+
+=item argument-list := ( argument (',' space argument)* )?
+
+Currently the only thing allowed in an argument list is a list of
+strings. The list can be empty and usually is.
+
+=item argument := point-name | quoted-string
+
+
 
 =item quoted-string := single-quoted-string | double-quoted-string
+
+A quoted string can use either single or double quotes.
 
 =item single-quoted-string :=
     "'" ((ANY - (BREAK | '\' | "'")) | "\'" | '\\')* "'"
 
+A single quoted string has Perl semantics. A backslash is used to encode
+a backslash or a single quote character.
+
+    .foo('Won\'t you scratch\\slash my back?')
+
 =item double-quoted-string :=
     '"' ((ANY - (BREAK | '\' | '"')) | '\"' | '\\' | '\n' | '\t')* '"'
+
+A double quoted string has limited backslash escaping. You can encode a
+backslash, double quote, newline or tab character.
+
+    .bar("\tline 1\n\"line\" 2\n")
 
 =item include-statement := '%include' space relative-file-path eol
 
@@ -268,6 +303,8 @@ An include statement causes the named relative file to be read. The file
 contents replace the include statement and are immediately parsed.
 
 =item blank-line := space* eol
+
+Blank lines are useful to space things out visually.
 
 =item comment := '#' line
 
@@ -359,6 +396,8 @@ The I<data sections> are all parsed by separate parsers/grammars.
 
 =head2 TestML Data Section Grammar
 
+This grammar defines the TestML data section markup.
+
 =over
 
 =item data-section := data-block*
@@ -413,7 +452,7 @@ A "phrase" data point is a string with no newlines.
 
 =item point-marker := '---' | meta.testml_point_marker
 
-A block marker is usually C<--->, but it is configurable via a meta
+A point marker is usually C<--->, but it is configurable via a meta
 statement, like this:
 
     testml_point_marker: +++
@@ -431,16 +470,18 @@ The above grammars define the valid syntax for a TestML document,
 but there is a set of constraints that all TestML documents should
 adhere to.
 
-=over
-
-=item Document Encoding
+=head2 Document Encoding
 
 All TestML documents are composed of the unicode character set and
 I<must> be encoded in UTF8.
 
-=item C<testml>
+=head2  Valid Meta Keywords
 
-The C<testml> meta statement is required and it must specify a version
+=over
+
+=item testml - B<required>
+
+The I<testml> meta statement is required and it must specify a version
 number. The TestML implementation can then determine whether or not it
 can process the document or not.
 
@@ -453,6 +494,33 @@ version numbers that have the same first number. So version 1.3 would be
 backwards compatible with 1.2, 1.1 and 1.0. Version 2.0 would probably
 break compatability.
 
+=item tests - I<optional>
+
+The I<tests> meta option specifies the expected number of tests that
+will be run by the runner. If the actual number differs the
+implementation may complain or throw an error.
+
+    tests: 13
+
+=item testml_block_marker
+
+If you choose to use the TestML data markup to encode your data section, you
+can choose the character sequence to replace the default ('==='). You would
+wnat to do this primarily if you had '===' at the beginning of a line in your
+data.
+
+Setting this option changes the parser to look for the specified pattern to
+find the start of the data section.
+
+    testml_block_marker: *=*
+
+=item testml_point_marker
+
+This option is the same as the testml_block_marker option above, except it is
+for the data point marker.
+
+    testml_point_marker: +++
+
 =back
 
 =head1 Outsanding Issues
@@ -463,7 +531,6 @@ break compatability.
 
 Need to determine if '%include' is allowed in the data section. If so it
 would require an escape mechanism to allow it as actual data.
-
 
 =back
 
@@ -483,10 +550,6 @@ The spec was reviewed and/or contributed to by the following people:
 
 =back
 
-=head1 Copyright
-
-Copyright (c) 2009. Ingy döt Net.
-
 =head1 License
 
 This work is licensed under the Creative Commons Attribution Share Alike
@@ -494,5 +557,9 @@ License. To view a copy of this license, visit
 L<http://creativecommons.org/licenses/by-sa/3.0/legalcode>;
 or, (b) send a letter to Creative Commons, 171 2nd Street, Suite 300,
 San Francisco, California, 94105, USA.
+
+=head1 Copyright
+
+Copyright (c) 2009. Ingy döt Net.
 
 =cut
