@@ -30,8 +30,10 @@
 	</ul>
 
 	<li><a href="#testml_document_constraints">TestML Document Constraints</a></li>
+	<li><a href="#outsanding_issues">Outsanding Issues</a></li>
 	<li><a href="#authors">Authors</a></li>
 	<li><a href="#copyright">Copyright</a></li>
+	<li><a href="#license">License</a></li>
 </ul>
 
 <hr name="index" />
@@ -46,7 +48,7 @@
 </p>
 <hr />
 <h1><a name="status">Status</a></h1>
-<p>Working Draft - 9 May, 2009</p>
+<p>Working Draft - 10 May, 2009</p>
 <p>This document is not the final 1.0 release. It is very new and under
 review, initial implementation and testing.</p>
 <p>
@@ -295,22 +297,36 @@ about the test document and the definitions of the assertions the test
 is declaring (test statements).</p>
 </dd>
 <dd>
-<p>The parsing of the head section should instantiate two TestML objects: the
-Meta object and the Assertions object.</p>
+<p>The parsing of the head section should instantiate two TestML objects:
+the Meta object and the Assertions object.</p>
 </dd>
 </li>
 <dt><strong><a name="meta_statement_keyword_space_value_eol" class="item">meta-statement := keyword ':' space value eol</a></strong>
 
 <dd>
-<p>Meta statements are key/value pairs separated by a colon and a space. A
-given meta setting may affect the document parsing from that point forward.</p>
+<p>Meta statements are key/value pairs separated by a colon and a
+space. A given meta setting may affect the document parsing from
+that point forward.</p>
+</dd>
+</li>
+<dt><strong><a name="keyword_a_z_a_z0_9" class="item">keyword := [a-z][a-z0-9_]*</a></strong>
+
+<dd>
+<p>A keyword is the name of a meta setting. See Constraints for the
+valid values.</p>
+</dd>
+</li>
+<dt><strong><a name="space" class="item">value := NON-SPACE (NON-BREAK* NON-SPACE)?</a></strong>
+
+<dd>
+<p>A value is a non blank, non empty, single line phrase of characters.</p>
 </dd>
 </li>
 <dt><strong><a name="test_statement_data_transform_space_operator_space_data_transform_eol" class="item">test-statement := data-transform space+ operator space+ data-transform eol</a></strong>
 
 <dd>
-<p>A test statement is a declaration of a testing operation. A typical statement
-looks like:</p>
+<p>A test statement is a declaration of a testing operation. A typical
+statement looks like:</p>
 </dd>
 <dd>
 <pre>
@@ -326,7 +342,15 @@ transform calls.</p>
 </li>
 <dt><strong><a name="transform_call_transform_name_argument_list" class="item">transform-call := '.' transform-name '(' argument-list ')'</a></strong>
 
-<dt><strong><a name="string" class="item">argument-list := ( '' | ( quoted-string (',' space quoted-string)* ) )</a></strong>
+<dt><strong><a name="string" class="item">argument-list := ( quoted-string (',' space quoted-string)* )?</a></strong>
+
+<dt><strong><a name="quoted_string_single_quoted_string_double_quoted_string" class="item">quoted-string := single-quoted-string | double-quoted-string</a></strong>
+
+<dt><strong><a name="single_quoted_string_any_break" class="item">single-quoted-string :=
+    &quot;'&quot; ((ANY - (BREAK | '\' | &quot;'&quot;)) | &quot;\'&quot; | '\\')* &quot;'&quot;</a></strong>
+
+<dt><strong><a name="double_quoted_string_any_break_n_t" class="item">double-quoted-string :=
+    '&quot;' ((ANY - (BREAK | '\' | '&quot;')) | '\&quot;' | '\\' | '\n' | '\t')* '&quot;'</a></strong>
 
 <dt><strong><a name="include_statement_include_space_relative_file_path_eol" class="item">include-statement := '%include' space relative-file-path eol</a></strong>
 
@@ -340,11 +364,11 @@ contents replace the include statement and are immediately parsed.</p>
 <dt><strong><a name="comment_line" class="item">comment := '#' line</a></strong>
 
 <dd>
-<p>A comment is a line that begins with a '#'. A '#' anywhere else on a line will
-not start a comment.</p>
+<p>A comment is a line that begins with a '#'. A '#' anywhere else on a
+line will not start a comment.</p>
 </dd>
 </li>
-<dt><strong><a name="space_space_char_tab_char" class="item">space := SPACE-CHAR | TAB-CHAR</a></strong>
+<dt><strong><a name="space_space_tab" class="item">space := SPACE | TAB</a></strong>
 
 <dd>
 <p>A <em>space</em> token is a normal space character or a tab character.</p>
@@ -359,20 +383,20 @@ not start a comment.</p>
 <dt><strong><a name="data_section_testml_data_section_yaml_data_section_json_data_section_xml_data_section" class="item">data-section := testml-data-section | yaml-data-section | json-data-section | xml-data-section</a></strong>
 
 <dd>
-<p>The data section defines a sequence of data objects, each of which consists of
-a short label phrase and a set of named data points.</p>
+<p>The data section defines a sequence of data objects, each of which
+consists of a short label phrase and a set of named data points.</p>
 </dd>
 <dd>
-<p>TestML defines a default syntax, but this section can also be specified in
-YAML, JSON or XML.</p>
+<p>TestML defines a default syntax, but this section can also be specified
+in YAML, JSON or XML.</p>
 </dd>
 </li>
 <dt><strong><a name="marker" class="item">testml-data-section := testml-data-block-marker (space | eol) rest</a></strong>
 
 <dd>
-<p>The <em>TestML data section</em> starts when the data block marker is detected at
-the beginning of a line and continues to the end of the file. This section is
-parsed into <em>data block</em> objects.</p>
+<p>The <em>TestML data section</em> starts when the data block marker is detected
+at the beginning of a line and continues to the end of the file. This
+section is parsed into <em>data block</em> objects.</p>
 </dd>
 <dd>
 <p>Here is an example data section in TestML:</p>
@@ -443,11 +467,11 @@ this format.</p>
       &lt;/block&gt;
     &lt;/testml&gt;</pre>
 </dd>
-<dt><strong><a name="rest_any_char" class="item">rest := ANY-CHAR+</a></strong>
+<dt><strong><a name="rest_any" class="item">rest := ANY+</a></strong>
 
 <dd>
-<p>The <em>rest</em> token is simply the remainder of the text in the file. The <em>data
-sections</em> are all parsed by separate parsers/grammars.</p>
+<p>The <em>rest</em> token is simply the remainder of the text in the file.
+The <em>data sections</em> are all parsed by separate parsers/grammars.</p>
 </dd>
 </li>
 </dl>
@@ -478,8 +502,8 @@ sections</em> are all parsed by separate parsers/grammars.</p>
 <dt><strong>block-header := block-marker (space block-label)? space* eol</strong>
 
 <dd>
-<p>A block header marks the start of a new block. The first one also marks the
-start of the data section. It contains an optional label.</p>
+<p>A block header marks the start of a new block. The first one also marks
+the start of the data section. It contains an optional label.</p>
 </dd>
 <dd>
 <pre>
@@ -500,15 +524,15 @@ statement, like this:</p>
 <dt><strong><a name="data_point_lines_point_phrase_point" class="item">data-point := lines-point | phrase-point</a></strong>
 
 <dd>
-<p>Data points are the pieces of raw data that TestML transforms and compares.
-They come in two flavors, lines and phrases.</p>
+<p>Data points are the pieces of raw data that TestML transforms and
+compares. They come in two flavors, lines and phrases.</p>
 </dd>
 </li>
 <dt><strong><a name="lines_point_point_marker_point_name_space_eol_line" class="item">lines-point := point-marker point-name space* eol line*</a></strong>
 
 <dd>
-<p>A &quot;lines&quot; data point is a string containing zero or more lines. If it has one
-or more lines it always ends with a newline.</p>
+<p>A &quot;lines&quot; data point is a string containing zero or more lines. If it
+has one or more lines it always ends with a newline.</p>
 </dd>
 <dd>
 <pre>
@@ -519,7 +543,7 @@ or more lines it always ends with a newline.</p>
     line4</pre>
 </dd>
 </li>
-<dt><strong><a name="phrase_point_point_marker_point_name_space_non_break_char_eol_blank_line" class="item">phrase-point := point-marker point-name ':' space NON-BREAK-CHAR* eol blank-line*</a></strong>
+<dt><strong><a name="phrase_point_point_marker_point_name_space_non_break_eol_blank_line" class="item">phrase-point := point-marker point-name ':' space NON-BREAK* eol blank-line*</a></strong>
 
 <dd>
 <p>A &quot;phrase&quot; data point is a string with no newlines.</p>
@@ -540,7 +564,7 @@ statement, like this:</p>
     testml_point_marker: +++</pre>
 </dd>
 </li>
-<dt><strong><a name="line_non_break_char_eol" class="item">line := NON-BREAK-CHAR* eol</a></strong>
+<dt><strong><a name="line_non_break_eol" class="item">line := NON-BREAK* eol</a></strong>
 
 <dd>
 <p>A line is a string of zero or more non break characters followed by
@@ -560,7 +584,7 @@ adhere to.</p>
 
 <dd>
 <p>All TestML documents are composed of the unicode character set and
-<em>should</em> be encoded in UTF-8 for maximum portability.</p>
+<em>must</em> be encoded in UTF8.</p>
 </dd>
 </li>
 <dt><strong><a name="testml" class="item"><code>testml</code></a></strong>
@@ -588,13 +612,26 @@ break compatability.</p>
 <p>
 </p>
 <hr />
+<h1><a name="outsanding_issues">Outsanding Issues</a></h1>
+<ul>
+<li><strong><a name="include" class="item">Include</a></strong>
+
+<p>Need to determine if '%include' is allowed in the data section. If so it
+would require an escape mechanism to allow it as actual data.</p>
+</li>
+</ul>
+<p>
+</p>
+<hr />
 <h1><a name="authors">Authors</a></h1>
 <p>TestML Version 1.0 was created by Ingy döt Net &lt;<a href="mailto:ingy@ingy.net">ingy@ingy.net</a>&gt;</p>
-<p>The spec was reviewed and contributed to by the following people:</p>
+<p>The spec was reviewed and/or contributed to by the following people:</p>
 <ul>
 <li><strong><a name="tony_bowden" class="item">Tony Bowden</a></strong>
 
 <li><strong><a name="chris_dent" class="item">Chris Dent</a></strong>
+
+<li><strong><a name="yuval_kogman" class="item">Yuval Kogman</a></strong>
 
 </ul>
 <p>
@@ -602,6 +639,15 @@ break compatability.</p>
 <hr />
 <h1><a name="copyright">Copyright</a></h1>
 <p>Copyright (c) 2009. Ingy döt Net.</p>
+<p>
+</p>
+<hr />
+<h1><a name="license">License</a></h1>
+<p>This work is licensed under the Creative Commons Attribution Share Alike
+License. To view a copy of this license, visit
+<a href="http://creativecommons.org/licenses/by-sa/3.0/legalcode">http://creativecommons.org/licenses/by-sa/3.0/legalcode</a>;
+or, (b) send a letter to Creative Commons, 171 2nd Street, Suite 300,
+San Francisco, California, 94105, USA.</p>
 
 
   </body>
