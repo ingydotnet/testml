@@ -37,7 +37,6 @@
 
 	</ul>
 
-	<li><a href="#outsanding_issues">Outsanding Issues</a></li>
 	<li><a href="#authors">Authors</a></li>
 	<li><a href="#license">License</a></li>
 	<li><a href="#copyright">Copyright</a></li>
@@ -49,6 +48,7 @@
 
 <p>
 </p>
+<hr />
 <h1><a name="testml">TestML</a></h1>
 <p>A Software Testing Meta Language. Version 1.0.</p>
 <p>
@@ -102,8 +102,8 @@ transform to invoke the Foo library's upper casing facility.</a></strong>
 test framework. The primary difference is that FIT's test documents are
 table/spreadsheet based, where TestML's are text file based. This belies
 the premise that FIT caters to business application development (where
-spreadsheets are heavily used), while TestML caters to open source library
-authors (where everything is in text files).</p>
+spreadsheets are heavily used), while TestML caters to open source
+library authors (where everything is in text files).</p>
 <p>The specifics of TestML, and the data format specifically, evolved
 directly from Ingy döt Net's data-driven Perl testing framework,
 <strong>Test::Base</strong>. Test::Base was written in 2004 and later ported to
@@ -120,8 +120,8 @@ realized the potential value of having the test suites be reusable.</p>
 <dd>
 <p>TestML strives to make no assumptions about the programming language,
 environment, or testing framework it will be used in. In this way, the
-same corpus of test documents can be used against multiple implementations
-of equivalent software.</p>
+same corpus of test documents can be used against multiple
+implementations of equivalent software.</p>
 </dd>
 </li>
 <dt><strong><a name="readability" class="item">Readability</a></strong>
@@ -201,6 +201,16 @@ assertions</em> and <em>data blocks</em>. This specification describes the forma
 of such a document.</p>
 </dd>
 </li>
+<dt><strong><a name="expression" class="item">Expression</a></strong>
+
+<dd>
+<p>A <em>data expression</em> is a <em>data point</em> name followed by zero or more
+calls to named <em>data transforms</em>.</p>
+</dd>
+<dd>
+<p>A <em>test assertion</em> compares the result of two data expressions.</p>
+</dd>
+</li>
 <dt><strong><a name="meta" class="item">Meta</a></strong>
 
 <dd>
@@ -258,9 +268,10 @@ test to pass.</p>
 <hr />
 <h1><a name="the_specification">The Specification</a></h1>
 <p>To simplify the TestML Specification, it is defined as both a <em>set of
-BNF grammars</em>, and a <em>set of constraints</em>. The grammars include a <em>top level
-document grammar</em> and a separate <em>TestML data section grammar</em>. The data
-section is separate, because it may be marked up in any of several syntaxes.</p>
+BNF grammars</em>, and a <em>set of constraints</em>. The grammars include a <em>top
+level document grammar</em> and a separate <em>TestML data section grammar</em>.
+The data section is separate, because it may be marked up in any of
+several syntaxes.</p>
 <p>
 </p>
 <h2><a name="top_level_document_grammar">Top Level Document Grammar</a></h2>
@@ -296,7 +307,7 @@ section is separate, because it may be marked up in any of several syntaxes.</p>
     LK P</pre>
 </dd>
 </li>
-<dt><strong><a name="head_section_meta_statement_test_statement_include_statement_comment_blank_line" class="item">head-section := ( meta-statement | test-statement | include-statement | comment | blank-line )+</a></strong>
+<dt><strong><a name="head_section_meta_statement_test_statement_include_statements_comment_blank_line" class="item">head-section := ( meta-statement | test-statement | include-statements | comment | blank-line )+</a></strong>
 
 <dd>
 <p>The head section contains both general information (meta statements)
@@ -308,7 +319,7 @@ is declaring (test statements).</p>
 the Meta object and the Assertions object.</p>
 </dd>
 </li>
-<dt><strong><a name="meta_statement_keyword_space_value_eol" class="item">meta-statement := keyword ':' space value eol</a></strong>
+<dt><strong><a name="meta_statement_keyword_space_value_eol" class="item">meta-statement := keyword ':' space+ value eol</a></strong>
 
 <dd>
 <p>Meta statements are key/value pairs separated by a colon and a
@@ -329,7 +340,7 @@ valid values.</p>
 <p>A value is a non blank, non empty, single line phrase of characters.</p>
 </dd>
 </li>
-<dt><strong><a name="test_statement_data_transform_space_operator_space_data_transform_eol" class="item">test-statement := data-transform space+ operator space+ data-transform eol</a></strong>
+<dt><strong><a name="test_statement_data_expression_space_operator_space_data_expression_eol" class="item">test-statement := data-expression space+ operator space+ data-expression eol</a></strong>
 
 <dd>
 <p>A test statement is a declaration of a testing operation. A typical
@@ -340,7 +351,7 @@ statement looks like:</p>
     input-point.transform1().transform2(arguments) == expected-output-point</pre>
 </dd>
 </li>
-<dt><strong><a name="data_transform_point_name_transform_call" class="item">data-transform := point-name transform-call*</a></strong>
+<dt><strong><a name="data_expression_point_name_transform_call" class="item">data-expression := point-name transform-call*</a></strong>
 
 <dd>
 <p>A data transform is a data point name followed by zero or more data
@@ -420,11 +431,23 @@ backslash, double quote, newline or tab character.</p>
     .bar(&quot;\tline 1\n\&quot;line\&quot; 2\n&quot;)</pre>
 </dd>
 </li>
+<dt><strong><a name="statement" class="item">include-statements := include-statement ( include-statement | comment | blank-line )*</a></strong>
+
+<dd>
+<p>A group of adjacent include statements is processed at once. All of the
+files are included into the current document stream and then parsing
+continues. Doing them as a group allows multiple files to be included in
+the data section, where '%include' statements are no longer recognized.</p>
+</dd>
+</li>
 <dt><strong><a name="include_statement_include_space_relative_file_path_eol" class="item">include-statement := '%include' space relative-file-path eol</a></strong>
 
 <dd>
 <p>An include statement causes the named relative file to be read. The file
 contents replace the include statement and are immediately parsed.</p>
+</dd>
+<dd>
+<p>The included file must end with a newline, unless the file is empty.</p>
 </dd>
 </li>
 <dt><strong><a name="blank_line_space_eol" class="item">blank-line := space* eol</a></strong>
@@ -558,7 +581,7 @@ The <em>data sections</em> are all parsed by separate parsers/grammars.</p>
 <p>A data section consists of 0-n data blocks.</p>
 </dd>
 </li>
-<dt><strong><a name="data_block_block_header_line_data_point" class="item">data-block := block-header line* data-point*</a></strong>
+<dt><strong><a name="header" class="item">data-block := block-header (blank-line | comment)* data-point*</a></strong>
 
 <dd>
 <p>A data block in TestML syntax looks like:</p>
@@ -679,6 +702,20 @@ can process the document or not.</p>
 version numbers that have the same first number. So version 1.3 would be
 backwards compatible with 1.2, 1.1 and 1.0. Version 2.0 would probably
 break compatability.</p>
+</dd>
+</li>
+<dt><strong><a name="title_optional" class="item">title - <em>optional</em></a></strong>
+
+<dd>
+<p>The <em>title</em> meta option specifies a short title phrase to describe the
+entire TestML document.</p>
+</dd>
+<dd>
+<pre>
+    title: These are a few of my Favorite Tests!</pre>
+</dd>
+<dd>
+<p>The TestML implementation is free to use this meta field as it sees fit.</p>
 </dd>
 </li>
 <dt><strong><a name="tests_optional" class="item">tests - <em>optional</em></a></strong>
