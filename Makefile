@@ -18,7 +18,7 @@ gh-clean:
 open: all
 	open index.html
 
-publish:
+publish: clean
 	git checkout master
 	git push
 	git checkout gh-pages
