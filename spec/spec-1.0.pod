@@ -1,3 +1,12 @@
+=begin comment
+
+= To Do
+
+- Make testml-pm match the current spec.
+- Use testml-pm in yaml-perl
+
+=end comment
+
 =head1 TestML
 
 A Software Testing Meta Language. Version 1.0.
@@ -55,8 +64,8 @@ The concept of TestML was heavily inspired by Ward Cunningham's B<FIT>
 test framework. The primary difference is that FIT's test documents are
 table/spreadsheet based, where TestML's are text file based. This belies
 the premise that FIT caters to business application development (where
-spreadsheets are heavily used), while TestML caters to open source library
-authors (where everything is in text files).
+spreadsheets are heavily used), while TestML caters to open source
+library authors (where everything is in text files).
 
 The specifics of TestML, and the data format specifically, evolved
 directly from Ingy döt Net's data-driven Perl testing framework,
@@ -74,8 +83,8 @@ TestML has the following Design Goals:
 
 TestML strives to make no assumptions about the programming language,
 environment, or testing framework it will be used in. In this way, the
-same corpus of test documents can be used against multiple implementations
-of equivalent software.
+same corpus of test documents can be used against multiple
+implementations of equivalent software.
 
 =item Readability
 
@@ -138,6 +147,13 @@ A I<TestML document> is a file containing some number of I<test
 assertions> and I<data blocks>. This specification describes the format
 of such a document.
 
+=item Expression
+
+A I<data expression> is a I<data point> name followed by zero or more
+calls to named I<data transforms>.
+
+A I<test assertion> compares the result of two data expressions.
+
 =item Meta
 
 A I<TestML document> can define a number of key/value pairs which are
@@ -182,9 +198,10 @@ test to pass.
 =head1 The Specification
 
 To simplify the TestML Specification, it is defined as both a I<set of
-BNF grammars>, and a I<set of constraints>. The grammars include a I<top level
-document grammar> and a separate I<TestML data section grammar>. The data
-section is separate, because it may be marked up in any of several syntaxes.
+BNF grammars>, and a I<set of constraints>. The grammars include a I<top
+level document grammar> and a separate I<TestML data section grammar>.
+The data section is separate, because it may be marked up in any of
+several syntaxes.
 
 =head2 Top Level Document Grammar
 
@@ -214,7 +231,7 @@ Here is an example document:
     --- bar
     LK P
 
-=item head-section := ( meta-statement | test-statement | include-statement | comment | blank-line )+
+=item head-section := ( meta-statement | test-statement | include-statements | comment | blank-line )+
 
 The head section contains both general information (meta statements)
 about the test document and the definitions of the assertions the test
@@ -223,7 +240,7 @@ is declaring (test statements).
 The parsing of the head section should instantiate two TestML objects:
 the Meta object and the Assertions object.
 
-=item meta-statement := keyword ':' space value eol
+=item meta-statement := keyword ':' space+ value eol
 
 Meta statements are key/value pairs separated by a colon and a
 space. A given meta setting may affect the document parsing from
@@ -238,14 +255,14 @@ valid values.
 
 A value is a non blank, non empty, single line phrase of characters.
 
-=item test-statement := data-transform space+ operator space+ data-transform eol
+=item test-statement := data-expression space+ operator space+ data-expression eol
 
 A test statement is a declaration of a testing operation. A typical
 statement looks like:
 
     input-point.transform1().transform2(arguments) == expected-output-point
 
-=item data-transform := point-name transform-call*
+=item data-expression := point-name transform-call*
 
 A data transform is a data point name followed by zero or more data
 transform calls.
@@ -299,10 +316,19 @@ backslash, double quote, newline or tab character.
 
     .bar("\tline 1\n\"line\" 2\n")
 
+=item include-statements := include-statement ( include-statement | comment | blank-line )*
+
+A group of adjacent include statements is processed at once. All of the
+files are included into the current document stream and then parsing
+continues. Doing them as a group allows multiple files to be included in
+the data section, where '%include' statements are no longer recognized.
+
 =item include-statement := '%include' space relative-file-path eol
 
 An include statement causes the named relative file to be read. The file
 contents replace the include statement and are immediately parsed.
+
+The included file must end with a newline, unless the file is empty.
 
 =item blank-line := space* eol
 
@@ -406,7 +432,7 @@ This grammar defines the TestML data section markup.
 
 A data section consists of 0-n data blocks.
 
-=item data-block := block-header line* data-point*
+=item data-block := block-header (blank-line | comment)* data-point*
 
 A data block in TestML syntax looks like:
 
@@ -496,6 +522,15 @@ version numbers that have the same first number. So version 1.3 would be
 backwards compatible with 1.2, 1.1 and 1.0. Version 2.0 would probably
 break compatability.
 
+=item title - I<optional>
+
+The I<title> meta option specifies a short title phrase to describe the
+entire TestML document.
+
+    title: These are a few of my Favorite Tests!
+
+The TestML implementation is free to use this meta field as it sees fit.
+
 =item tests - I<optional>
 
 The I<tests> meta option specifies the expected number of tests that
@@ -529,21 +564,6 @@ it is for the data point marker.
 
 Files are included by a relative path. If the file does not exist, and
 thus can not be included, it must be considered an error.
-
-=begin comment
-
-=head1 Outsanding Issues
-
-=over
-
-=item * Include
-
-Need to determine if '%include' is allowed in the data section. If so it
-would require an escape mechanism to allow it as actual data.
-
-=back
-
-=end comment
 
 =head1 Authors
 
