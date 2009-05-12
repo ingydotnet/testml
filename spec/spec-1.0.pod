@@ -296,7 +296,7 @@ that point forward.
 
 =item keyword := WORD*
 
-A keyword is the name of a meta setting. See Constraints for the
+A keyword is the name of a meta setting. See L</Valid Meta Keywords> for the
 valid values.
 
 =item value := NON-SPACE (NON-BREAK* NON-SPACE)?
