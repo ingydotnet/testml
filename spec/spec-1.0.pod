@@ -115,8 +115,7 @@ The software that is being tested.
 =item Assertion
 
 A I<test assertion> is a statement in the I<TestML document> that
-compares two I<data points> using a I<testing operator>, after they have
-been passed through a set of I<data transforms>.
+compares two I<data expressions> using a I<testing operator>.
 
 =item Block
 
