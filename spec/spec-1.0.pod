@@ -70,7 +70,7 @@ TestML has the following Design Goals:
 
 =over
 
-=item Platform Agnostic
+=item Platform Agnosticism
 
 TestML strives to make no assumptions about the programming language,
 environment, or testing framework it will be used in. In this way, the
