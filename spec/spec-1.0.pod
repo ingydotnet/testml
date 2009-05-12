@@ -1,12 +1,3 @@
-=begin comment
-
-= To Do
-
-- Make testml-pm match the current spec.
-- Use testml-pm in yaml-perl
-
-=end comment
-
 =head1 TestML
 
 A Software Testing Meta Language. Version 1.0.
@@ -203,6 +194,64 @@ level document grammar> and a separate I<TestML data section grammar>.
 The data section is separate, because it may be marked up in any of
 several syntaxes.
 
+=head2 Grammar Operators and Primitives
+
+This is a list of the special characters used in the grammars. They are
+mostly borrowed from the PCRE regexp standard.
+
+=over
+
+=item * '|' - Alternation
+
+=item * '-' - Exclusion
+
+=item * '*' - Zero or more
+
+=item * '+' - One or more
+
+=item * '?' - Zero or one
+
+=item * '(...)' - Parentheses indicate grouping
+
+=back
+
+The following primitives are defined in terms of their PCRE regexp
+equivalents.
+
+NOTE: There is a premise that only printable characters are allowed in a
+      TestML document stream. The primitives therefore implicitly
+      exclude control characters and such.
+
+=over
+
+=item * ANY - '[\s\S]' - Any unicode character
+
+=item * SPACE - '[\ \t]' - A space or tab character
+
+=item * BREAK - '\n' - A newline character
+
+=item * EOL - '\r?\n' - A Unix or DOS line ending
+
+=item * NON-SPACE - '\S' - A non-space character
+
+=item * NON-BREAK - '.' - Any character except newline
+
+=item * ALPHA - '[A-Za-z]' - ASCII alphabetic character
+
+=item * ALPHANUM - '[A-Za-z0-9]' - ASCII alpha numeric character
+
+=item * WORD - '\w' - ie '[A-Za-z0-9_]' - A "word" character
+
+=item * BACK - '\' - A backslash character
+
+=item * SINGLE - "'" - A single quote character
+
+=item * DOUBLE - '"' - A double quote character
+
+=item * ESCAPE - '[0abenrtz]' - One of the escapable character IDs
+
+=back 
+
 =head2 Top Level Document Grammar
 
 =over
@@ -238,15 +287,15 @@ about the test document and the definitions of the assertions the test
 is declaring (test statements).
 
 The parsing of the head section should instantiate two TestML objects:
-the Meta object and the Assertions object.
+the Meta object and the Tests object.
 
-=item meta-statement := keyword ':' space+ value eol
+=item meta-statement := keyword ':' SPACE+ value EOL
 
 Meta statements are key/value pairs separated by a colon and a
-space. A given meta setting may affect the document parsing from
+SPACE. A given meta setting may affect the document parsing from
 that point forward.
 
-=item keyword := [a-z][a-z0-9_]*
+=item keyword := WORD*
 
 A keyword is the name of a meta setting. See Constraints for the
 valid values.
@@ -255,7 +304,7 @@ valid values.
 
 A value is a non blank, non empty, single line phrase of characters.
 
-=item test-statement := data-expression space+ operator space+ data-expression eol
+=item test-statement := data-expression SPACE+ operator SPACE+ data-expression EOL
 
 A test statement is a declaration of a testing operation. A typical
 statement looks like:
@@ -267,7 +316,7 @@ statement looks like:
 A data transform is a data point name followed by zero or more data
 transform calls.
 
-=item point-name := [A-Za-z][A-Za-z0-9_]*
+=item point-name := ALPHA WORD*
 
 A point name is the name of a data point defined in the data section of
 the document.
@@ -279,13 +328,13 @@ transform/method with a list of arguments.
 
     .transform_name()
 
-=item transform-name := [A-Za-z][A-Za-z0-9_]*
+=item transform-name := APLHA WORD*
 
 A transform name is a like a method name in a programming language.
 
     thisIsTheTransformName
 
-=item argument-list := ( argument (',' space argument)* )?
+=item argument-list := ( argument (',' SPACE argument)* )?
 
 Currently the only thing allowed in an argument list is a list of
 strings. The list can be empty and usually is.
@@ -301,7 +350,7 @@ point will be passed to the transform when the test is run.
 A quoted string can use either single or double quotes.
 
 =item single-quoted-string :=
-    "'" ((ANY - (BREAK | '\' | "'")) | "\'" | '\\')* "'"
+    SINGLE ((ANY - (BREAK | BACK | SINGLE)) | BACK SINGLE | BACK BACK)* SINGLE
 
 A single quoted string has Perl semantics. A backslash is used to encode
 a backslash or a single quote character.
@@ -309,28 +358,30 @@ a backslash or a single quote character.
     .foo('Won\'t you scratch\\slash my back?')
 
 =item double-quoted-string :=
-    '"' ((ANY - (BREAK | '\' | '"')) | '\"' | '\\' | '\n' | '\t')* '"'
+    DOUBLE ((ANY - (BREAK | BACK | DOUBLE)) |
+    BACK DOUBLE | BACK BACK | BACK ESCAPE )* DOUBLE
 
 A double quoted string has limited backslash escaping. You can encode a
 backslash, double quote, newline or tab character.
 
     .bar("\tline 1\n\"line\" 2\n")
 
-=item include-statements := include-statement ( include-statement | comment | blank-line )*
+=item include-statements :=
+    include-statement ( include-statement | comment | blank-line )*
 
 A group of adjacent include statements is processed at once. All of the
 files are included into the current document stream and then parsing
 continues. Doing them as a group allows multiple files to be included in
 the data section, where '%include' statements are no longer recognized.
 
-=item include-statement := '%include' space relative-file-path eol
+=item include-statement := '%include' SPACE relative-file-path EOL
 
 An include statement causes the named relative file to be read. The file
 contents replace the include statement and are immediately parsed.
 
 The included file must end with a newline, unless the file is empty.
 
-=item blank-line := space* eol
+=item blank-line := SPACE* EOL
 
 Blank lines are useful to space things out visually.
 
@@ -338,14 +389,6 @@ Blank lines are useful to space things out visually.
 
 A comment is a line that begins with a '#'. A '#' anywhere else on a
 line will not start a comment.
-
-=item space := SPACE | TAB
-
-A I<space> token is a normal space character or a tab character.
-
-=item eol := CARRIAGE-RETURN? NEWLINE
-
-The I<eol> token is a Unix or DOS line ending.
 
 =item data-section := testml-data-section | yaml-data-section | json-data-section | xml-data-section
 
@@ -355,7 +398,7 @@ consists of a short label phrase and a set of named data points.
 TestML defines a default syntax, but this section can also be specified
 in YAML, JSON or XML.
 
-=item testml-data-section := testml-data-block-marker (space | eol) rest
+=item testml-data-section := testml-data-block-marker (SPACE | EOL) rest
 
 The I<TestML data section> starts when the data block marker is detected
 at the beginning of a line and continues to the end of the file. This
@@ -373,7 +416,7 @@ Here is an example data section in TestML:
 See L<TestML Data Section Grammar> for the more formal syntax grammar of
 this format.
 
-=item yaml-data-section :=  '---' (space | eol) rest
+=item yaml-data-section :=  '---' (SPACE | EOL) rest
 
 Here is an example data section in YAML:
 
@@ -442,7 +485,7 @@ A data block in TestML syntax looks like:
     line
     data
 
-=item block-header := block-marker (space block-label)? space* eol
+=item block-header := block-marker (SPACE block-label)? SPACE* EOL
 
 A block header marks the start of a new block. The first one also marks
 the start of the data section. It contains an optional label.
@@ -461,7 +504,7 @@ statement, like this:
 Data points are the pieces of raw data that TestML transforms and
 compares. They come in two flavors, lines and phrases.
 
-=item lines-point := point-marker point-name space* eol line*
+=item lines-point := point-marker point-name SPACE* EOL line*
 
 A "lines" data point is a string containing zero or more lines. If it
 has one or more lines it always ends with a newline.
@@ -472,7 +515,7 @@ has one or more lines it always ends with a newline.
     
     line4
 
-=item phrase-point := point-marker point-name ':' space NON-BREAK* eol blank-line*
+=item phrase-point := point-marker point-name ':' SPACE NON-BREAK* EOL blank-line*
 
 A "phrase" data point is a string with no newlines.
 
@@ -485,7 +528,7 @@ statement, like this:
 
     testml_point_marker: +++
 
-=item line := NON-BREAK* eol
+=item line := NON-BREAK* EOL
 
 A line is a string of zero or more non break characters followed by
 a newline.
@@ -494,16 +537,20 @@ a newline.
 
 =head2 TestML Document Constraints
 
-The above grammars define the valid syntax for a TestML document,
-but there is a set of constraints that all TestML documents should
+The above grammars define the valid syntax for a TestML document, but
+there is a also set of constraints that all TestML documents must
 adhere to.
 
 =head3 Document Encoding
 
-All TestML documents are composed of the unicode character set and
-I<must> be encoded in UTF8.
+All TestML documents are composed of the printable unicode character set
+and I<must> be encoded in UTF8. Any character that does not meet these
+requirements must cause an error.
 
 =head3  Valid Meta Keywords
+
+If the parser detects a meta keyword that is not listed below, it must
+cause an error.
 
 =over
 
@@ -546,8 +593,8 @@ you can choose the character sequence to replace the default ('===').
 You would wnat to do this primarily if you had '===' at the beginning of
 a line in your data.
 
-Setting this option changes the parser to look for the specified pattern
-to find the start of the data section.
+Setting this option causes the parser to immediately start looking for
+the specified pattern to indicate the start of the data section.
 
     testml_block_marker: *=*
 
@@ -563,7 +610,8 @@ it is for the data point marker.
 =head3 Include Files
 
 Files are included by a relative path. If the file does not exist, and
-thus can not be included, it must be considered an error.
+thus can not be included, it must be considered an error. Recursive
+inclusion must also be detected and cause an error.
 
 =head1 Authors
 
