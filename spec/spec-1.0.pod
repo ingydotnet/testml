@@ -188,7 +188,7 @@ test to pass.
 =head1 The Specification
 
 To simplify the TestML Specification, it is defined by both a I<set of
-BNF grammars>, and a I<set of constraints>. The grammars include a I<top
+BNF grammars> and a I<set of constraints>. The grammars include a I<top
 level document grammar> and a separate I<TestML data section grammar>.
 The data section is separate, because it may be marked up in any of
 several syntaxes.
