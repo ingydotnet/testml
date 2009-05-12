@@ -53,7 +53,7 @@ transform to invoke the Foo library's upper casing facility.
 
 The concept of TestML was heavily inspired by Ward Cunningham's B<FIT>
 test framework. The primary difference is that FIT's test documents are
-table/spreadsheet based, where TestML's are text file based. This belies
+table/spreadsheet based, where TestML's are text file based. This reflects
 the premise that FIT caters to business application development (where
 spreadsheets are heavily used), while TestML caters to open source
 library authors (where everything is in text files).
@@ -62,7 +62,7 @@ The specifics of TestML, and the data format specifically, evolved
 directly from Ingy döt Net's data-driven Perl testing framework,
 B<Test::Base>. Test::Base was written in 2004 and later ported to
 JavaScript. As Ingy ported various libraries to other languages, he
-realized the potential value of having the test suites be reusable.
+realized the potential value of making the test suites reusable.
 
 =head1 Design Goals
 
