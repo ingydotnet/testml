@@ -177,17 +177,17 @@ the I<data blocks> against which the test assertions are applied.
 =item Transform
 
 A I<transform> is a method provided by a I<bridge class> that changes a
-I<data point> form one form into another. A transform usually invokes
+I<data point> from one form into another. A transform usually invokes
 functionality of the I<application> it is testing. The whole idea of
 TestML is that by passing a data point through one or more transforms,
-you can make it equivalent to some other data point, which causes the
+you can make it equivalent to some other data point, causing the
 test to pass.
 
 =back
 
 =head1 The Specification
 
-To simplify the TestML Specification, it is defined as both a I<set of
+To simplify the TestML Specification, it is defined by both a I<set of
 BNF grammars>, and a I<set of constraints>. The grammars include a I<top
 level document grammar> and a separate I<TestML data section grammar>.
 The data section is separate, because it may be marked up in any of
