@@ -25,6 +25,7 @@
 	<li><a href="#the_specification">The Specification</a></li>
 	<ul>
 
+		<li><a href="#grammar_operators_and_primitives">Grammar Operators and Primitives</a></li>
 		<li><a href="#top_level_document_grammar">Top Level Document Grammar</a></li>
 		<li><a href="#testml_data_section_grammar">TestML Data Section Grammar</a></li>
 		<li><a href="#testml_document_constraints">TestML Document Constraints</a></li>
@@ -48,7 +49,6 @@
 
 <p>
 </p>
-<hr />
 <h1><a name="testml">TestML</a></h1>
 <p>A Software Testing Meta Language. Version 1.0.</p>
 <p>
@@ -274,6 +274,58 @@ The data section is separate, because it may be marked up in any of
 several syntaxes.</p>
 <p>
 </p>
+<h2><a name="grammar_operators_and_primitives">Grammar Operators and Primitives</a></h2>
+<p>This is a list of the special characters used in the grammars. They are
+mostly borrowed from the PCRE regexp standard.</p>
+<ul>
+<li><strong><a name="alternation" class="item">'|' - Alternation</a></strong>
+
+<li><strong><a name="exclusion" class="item">'-' - Exclusion</a></strong>
+
+<li><strong><a name="zero_or_more" class="item">'*' - Zero or more</a></strong>
+
+<li><strong><a name="one_or_more" class="item">'+' - One or more</a></strong>
+
+<li><strong><a name="zero_or_one" class="item">'?' - Zero or one</a></strong>
+
+<li><strong><a name="parentheses_indicate_grouping" class="item">'(...)' - Parentheses indicate grouping</a></strong>
+
+</ul>
+<p>The following primitives are defined in terms of their PCRE regexp
+equivalents.</p>
+<p>NOTE: There is a premise that only printable characters are allowed in a
+      TestML document stream. The primitives therefore implicitly
+      exclude control characters and such.</p>
+<ul>
+<li><strong><a name="any_s_s_any_unicode_character" class="item">ANY - '[\s\S]' - Any unicode character</a></strong>
+
+<li><strong><a name="space_t_a_space_or_tab_character" class="item">SPACE - '[\ \t]' - A space or tab character</a></strong>
+
+<li><strong><a name="break_n_a_newline_character" class="item">BREAK - '\n' - A newline character</a></strong>
+
+<li><strong><a name="eol_r_n_a_unix_or_dos_line_ending" class="item">EOL - '\r?\n' - A Unix or DOS line ending</a></strong>
+
+<li><strong><a name="non_space_s_a_non_space_character" class="item">NON-SPACE - '\S' - A non-space character</a></strong>
+
+<li><strong><a name="non_break_any_character_except_newline" class="item">NON-BREAK - '.' - Any character except newline</a></strong>
+
+<li><strong><a name="alpha_a_za_z_ascii_alphabetic_character" class="item">ALPHA - '[A-Za-z]' - ASCII alphabetic character</a></strong>
+
+<li><strong><a name="alphanum_a_za_z0_9_ascii_alpha_numeric_character" class="item">ALPHANUM - '[A-Za-z0-9]' - ASCII alpha numeric character</a></strong>
+
+<li><strong><a name="word_w_ie_a_za_z0_9_a_word_character" class="item">WORD - '\w' - ie '[A-Za-z0-9_]' - A &quot;word&quot; character</a></strong>
+
+<li><strong><a name="back_a_backslash_character" class="item">BACK - '\' - A backslash character</a></strong>
+
+<li><strong><a name="single_a_single_quote_character" class="item">SINGLE - &quot;'&quot; - A single quote character</a></strong>
+
+<li><strong><a name="double_a_double_quote_character" class="item">DOUBLE - '&quot;' - A double quote character</a></strong>
+
+<li><strong><a name="escape_0abenrtz_one_of_the_escapable_character_ids" class="item">ESCAPE - '[0abenrtz]' - One of the escapable character IDs</a></strong>
+
+</ul>
+<p>
+</p>
 <h2><a name="top_level_document_grammar">Top Level Document Grammar</a></h2>
 <dl>
 <dt><strong><a name="document_head_section_data_section" class="item">document := head-section data-section</a></strong>
@@ -316,18 +368,18 @@ is declaring (test statements).</p>
 </dd>
 <dd>
 <p>The parsing of the head section should instantiate two TestML objects:
-the Meta object and the Assertions object.</p>
+the Meta object and the Tests object.</p>
 </dd>
 </li>
-<dt><strong><a name="meta_statement_keyword_space_value_eol" class="item">meta-statement := keyword ':' space+ value eol</a></strong>
+<dt><strong><a name="meta_statement_keyword_space_value_eol" class="item">meta-statement := keyword ':' SPACE+ value EOL</a></strong>
 
 <dd>
 <p>Meta statements are key/value pairs separated by a colon and a
-space. A given meta setting may affect the document parsing from
+SPACE. A given meta setting may affect the document parsing from
 that point forward.</p>
 </dd>
 </li>
-<dt><strong><a name="keyword_a_z_a_z0_9" class="item">keyword := [a-z][a-z0-9_]*</a></strong>
+<dt><strong><a name="keyword_word" class="item">keyword := WORD*</a></strong>
 
 <dd>
 <p>A keyword is the name of a meta setting. See Constraints for the
@@ -340,7 +392,7 @@ valid values.</p>
 <p>A value is a non blank, non empty, single line phrase of characters.</p>
 </dd>
 </li>
-<dt><strong><a name="test_statement_data_expression_space_operator_space_data_expression_eol" class="item">test-statement := data-expression space+ operator space+ data-expression eol</a></strong>
+<dt><strong><a name="test_statement_data_expression_space_operator_space_data_expression_eol" class="item">test-statement := data-expression SPACE+ operator SPACE+ data-expression EOL</a></strong>
 
 <dd>
 <p>A test statement is a declaration of a testing operation. A typical
@@ -358,7 +410,7 @@ statement looks like:</p>
 transform calls.</p>
 </dd>
 </li>
-<dt><strong><a name="point_name_a_za_z_a_za_z0_9" class="item">point-name := [A-Za-z][A-Za-z0-9_]*</a></strong>
+<dt><strong><a name="point_name_alpha_word" class="item">point-name := ALPHA WORD*</a></strong>
 
 <dd>
 <p>A point name is the name of a data point defined in the data section of
@@ -376,7 +428,7 @@ transform/method with a list of arguments.</p>
     .transform_name()</pre>
 </dd>
 </li>
-<dt><strong><a name="transform_name_a_za_z_a_za_z0_9" class="item">transform-name := [A-Za-z][A-Za-z0-9_]*</a></strong>
+<dt><strong><a name="transform_name_aplha_word" class="item">transform-name := APLHA WORD*</a></strong>
 
 <dd>
 <p>A transform name is a like a method name in a programming language.</p>
@@ -386,7 +438,7 @@ transform/method with a list of arguments.</p>
     thisIsTheTransformName</pre>
 </dd>
 </li>
-<dt><strong><a name="argument" class="item">argument-list := ( argument (',' space argument)* )?</a></strong>
+<dt><strong><a name="argument" class="item">argument-list := ( argument (',' SPACE argument)* )?</a></strong>
 
 <dd>
 <p>Currently the only thing allowed in an argument list is a list of
@@ -407,8 +459,8 @@ point will be passed to the transform when the test is run.</p>
 <p>A quoted string can use either single or double quotes.</p>
 </dd>
 </li>
-<dt><strong><a name="single_quoted_string_any_break" class="item">single-quoted-string :=
-    &quot;'&quot; ((ANY - (BREAK | '\' | &quot;'&quot;)) | &quot;\'&quot; | '\\')* &quot;'&quot;</a></strong>
+<dt><strong><a name="single" class="item">single-quoted-string :=
+    SINGLE ((ANY - (BREAK | BACK | SINGLE)) | BACK SINGLE | BACK BACK)* SINGLE</a></strong>
 
 <dd>
 <p>A single quoted string has Perl semantics. A backslash is used to encode
@@ -419,8 +471,9 @@ a backslash or a single quote character.</p>
     .foo('Won\'t you scratch\\slash my back?')</pre>
 </dd>
 </li>
-<dt><strong><a name="double_quoted_string_any_break_n_t" class="item">double-quoted-string :=
-    '&quot;' ((ANY - (BREAK | '\' | '&quot;')) | '\&quot;' | '\\' | '\n' | '\t')* '&quot;'</a></strong>
+<dt><strong><a name="double" class="item">double-quoted-string :=
+    DOUBLE ((ANY - (BREAK | BACK | DOUBLE)) |
+    BACK DOUBLE | BACK BACK | BACK ESCAPE )* DOUBLE</a></strong>
 
 <dd>
 <p>A double quoted string has limited backslash escaping. You can encode a
@@ -431,7 +484,8 @@ backslash, double quote, newline or tab character.</p>
     .bar(&quot;\tline 1\n\&quot;line\&quot; 2\n&quot;)</pre>
 </dd>
 </li>
-<dt><strong><a name="statement" class="item">include-statements := include-statement ( include-statement | comment | blank-line )*</a></strong>
+<dt><strong><a name="statement" class="item">include-statements :=
+    include-statement ( include-statement | comment | blank-line )*</a></strong>
 
 <dd>
 <p>A group of adjacent include statements is processed at once. All of the
@@ -440,7 +494,7 @@ continues. Doing them as a group allows multiple files to be included in
 the data section, where '%include' statements are no longer recognized.</p>
 </dd>
 </li>
-<dt><strong><a name="include_statement_include_space_relative_file_path_eol" class="item">include-statement := '%include' space relative-file-path eol</a></strong>
+<dt><strong><a name="include_statement_include_space_relative_file_path_eol" class="item">include-statement := '%include' SPACE relative-file-path EOL</a></strong>
 
 <dd>
 <p>An include statement causes the named relative file to be read. The file
@@ -450,7 +504,7 @@ contents replace the include statement and are immediately parsed.</p>
 <p>The included file must end with a newline, unless the file is empty.</p>
 </dd>
 </li>
-<dt><strong><a name="blank_line_space_eol" class="item">blank-line := space* eol</a></strong>
+<dt><strong><a name="blank_line_space_eol" class="item">blank-line := SPACE* EOL</a></strong>
 
 <dd>
 <p>Blank lines are useful to space things out visually.</p>
@@ -461,18 +515,6 @@ contents replace the include statement and are immediately parsed.</p>
 <dd>
 <p>A comment is a line that begins with a '#'. A '#' anywhere else on a
 line will not start a comment.</p>
-</dd>
-</li>
-<dt><strong><a name="space_space_tab" class="item">space := SPACE | TAB</a></strong>
-
-<dd>
-<p>A <em>space</em> token is a normal space character or a tab character.</p>
-</dd>
-</li>
-<dt><strong><a name="eol_carriage_return_newline" class="item">eol := CARRIAGE-RETURN? NEWLINE</a></strong>
-
-<dd>
-<p>The <em>eol</em> token is a Unix or DOS line ending.</p>
 </dd>
 </li>
 <dt><strong><a name="data_section_testml_data_section_yaml_data_section_json_data_section_xml_data_section" class="item">data-section := testml-data-section | yaml-data-section | json-data-section | xml-data-section</a></strong>
@@ -486,7 +528,7 @@ consists of a short label phrase and a set of named data points.</p>
 in YAML, JSON or XML.</p>
 </dd>
 </li>
-<dt><strong><a name="marker" class="item">testml-data-section := testml-data-block-marker (space | eol) rest</a></strong>
+<dt><strong><a name="marker" class="item">testml-data-section := testml-data-block-marker (SPACE | EOL) rest</a></strong>
 
 <dd>
 <p>The <em>TestML data section</em> starts when the data block marker is detected
@@ -510,7 +552,7 @@ section is parsed into <em>data block</em> objects.</p>
 this format.</p>
 </dd>
 </li>
-<dt><strong><a name="yaml_data_section_space_eol_rest" class="item">yaml-data-section :=  '---' (space | eol) rest</a></strong>
+<dt><strong><a name="yaml_data_section_space_eol_rest" class="item">yaml-data-section :=  '---' (SPACE | EOL) rest</a></strong>
 
 <dd>
 <p>Here is an example data section in YAML:</p>
@@ -595,7 +637,7 @@ The <em>data sections</em> are all parsed by separate parsers/grammars.</p>
     data</pre>
 </dd>
 </li>
-<dt><strong>block-header := block-marker (space block-label)? space* eol</strong>
+<dt><strong>block-header := block-marker (SPACE block-label)? SPACE* EOL</strong>
 
 <dd>
 <p>A block header marks the start of a new block. The first one also marks
@@ -624,7 +666,7 @@ statement, like this:</p>
 compares. They come in two flavors, lines and phrases.</p>
 </dd>
 </li>
-<dt><strong><a name="lines_point_point_marker_point_name_space_eol_line" class="item">lines-point := point-marker point-name space* eol line*</a></strong>
+<dt><strong><a name="lines_point_point_marker_point_name_space_eol_line" class="item">lines-point := point-marker point-name SPACE* EOL line*</a></strong>
 
 <dd>
 <p>A &quot;lines&quot; data point is a string containing zero or more lines. If it
@@ -639,7 +681,7 @@ has one or more lines it always ends with a newline.</p>
     line4</pre>
 </dd>
 </li>
-<dt><strong><a name="phrase_point_point_marker_point_name_space_non_break_eol_blank_line" class="item">phrase-point := point-marker point-name ':' space NON-BREAK* eol blank-line*</a></strong>
+<dt><strong><a name="phrase_point_point_marker_point_name_space_non_break_eol_blank_line" class="item">phrase-point := point-marker point-name ':' SPACE NON-BREAK* EOL blank-line*</a></strong>
 
 <dd>
 <p>A &quot;phrase&quot; data point is a string with no newlines.</p>
@@ -660,7 +702,7 @@ statement, like this:</p>
     testml_point_marker: +++</pre>
 </dd>
 </li>
-<dt><strong><a name="line_non_break_eol" class="item">line := NON-BREAK* eol</a></strong>
+<dt><strong><a name="line_non_break_eol" class="item">line := NON-BREAK* EOL</a></strong>
 
 <dd>
 <p>A line is a string of zero or more non break characters followed by
@@ -671,17 +713,20 @@ a newline.</p>
 <p>
 </p>
 <h2><a name="testml_document_constraints">TestML Document Constraints</a></h2>
-<p>The above grammars define the valid syntax for a TestML document,
-but there is a set of constraints that all TestML documents should
+<p>The above grammars define the valid syntax for a TestML document, but
+there is a also set of constraints that all TestML documents must
 adhere to.</p>
 <p>
 </p>
 <h3><a name="document_encoding">Document Encoding</a></h3>
-<p>All TestML documents are composed of the unicode character set and
-<em>must</em> be encoded in UTF8.</p>
+<p>All TestML documents are composed of the printable unicode character set
+and <em>must</em> be encoded in UTF8. Any character that does not meet these
+requirements must cause an error.</p>
 <p>
 </p>
 <h3><a name="valid_meta_keywords">Valid Meta Keywords</a></h3>
+<p>If the parser detects a meta keyword that is not listed below, it must
+cause an error.</p>
 <dl>
 <dt><strong><a name="testml_required" class="item">testml - <strong>required</strong></a></strong>
 
@@ -739,8 +784,8 @@ You would wnat to do this primarily if you had '===' at the beginning of
 a line in your data.</p>
 </dd>
 <dd>
-<p>Setting this option changes the parser to look for the specified pattern
-to find the start of the data section.</p>
+<p>Setting this option causes the parser to immediately start looking for
+the specified pattern to indicate the start of the data section.</p>
 </dd>
 <dd>
 <pre>
@@ -763,7 +808,8 @@ it is for the data point marker.</p>
 </p>
 <h3><a name="include_files">Include Files</a></h3>
 <p>Files are included by a relative path. If the file does not exist, and
-thus can not be included, it must be considered an error.</p>
+thus can not be included, it must be considered an error. Recursive
+inclusion must also be detected and cause an error.</p>
 <p>
 </p>
 <hr />
