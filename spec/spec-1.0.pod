@@ -546,7 +546,7 @@ All TestML documents are composed of the printable unicode character set
 and I<must> be encoded in UTF8. Any character that does not meet these
 requirements must cause an error.
 
-=head3  Valid Meta Keywords
+=head3 Valid Meta Keywords
 
 If the parser detects a meta keyword that is not listed below, it must
 cause an error.
