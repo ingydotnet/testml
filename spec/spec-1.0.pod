@@ -53,7 +53,7 @@ transform to invoke the Foo library's upper casing facility.
 
 The concept of TestML was heavily inspired by Ward Cunningham's B<FIT>
 test framework. The primary difference is that FIT's test documents are
-table/spreadsheet based, where TestML's are text file based. This belies
+table/spreadsheet based, where TestML's are text file based. This reflects
 the premise that FIT caters to business application development (where
 spreadsheets are heavily used), while TestML caters to open source
 library authors (where everything is in text files).
@@ -62,7 +62,7 @@ The specifics of TestML, and the data format specifically, evolved
 directly from Ingy döt Net's data-driven Perl testing framework,
 B<Test::Base>. Test::Base was written in 2004 and later ported to
 JavaScript. As Ingy ported various libraries to other languages, he
-realized the potential value of having the test suites be reusable.
+realized the potential value of making the test suites reusable.
 
 =head1 Design Goals
 
@@ -70,7 +70,7 @@ TestML has the following Design Goals:
 
 =over
 
-=item Platform Agnostic
+=item Platform Agnosticism
 
 TestML strives to make no assumptions about the programming language,
 environment, or testing framework it will be used in. In this way, the
@@ -115,8 +115,7 @@ The software that is being tested.
 =item Assertion
 
 A I<test assertion> is a statement in the I<TestML document> that
-compares two I<data points> using a I<testing operator>, after they have
-been passed through a set of I<data transforms>.
+compares two I<data expressions> using a I<testing operator>.
 
 =item Block
 
@@ -178,18 +177,18 @@ the I<data blocks> against which the test assertions are applied.
 =item Transform
 
 A I<transform> is a method provided by a I<bridge class> that changes a
-I<data point> form one form into another. A transform usually invokes
+I<data point> from one form into another. A transform usually invokes
 functionality of the I<application> it is testing. The whole idea of
 TestML is that by passing a data point through one or more transforms,
-you can make it equivalent to some other data point, which causes the
+you can make it equivalent to some other data point, causing the
 test to pass.
 
 =back
 
 =head1 The Specification
 
-To simplify the TestML Specification, it is defined as both a I<set of
-BNF grammars>, and a I<set of constraints>. The grammars include a I<top
+To simplify the TestML Specification, it is defined by both a I<set of
+BNF grammars> and a I<set of constraints>. The grammars include a I<top
 level document grammar> and a separate I<TestML data section grammar>.
 The data section is separate, because it may be marked up in any of
 several syntaxes.
@@ -301,7 +300,7 @@ that point forward.
 
 =item keyword := WORD*
 
-A keyword is the name of a meta setting. See Constraints for the
+A keyword is the name of a meta setting. See L</Valid Meta Keywords> for the
 valid values.
 
 =item value := NON-SPACE (NON-BREAK* NON-SPACE)?
@@ -549,7 +548,7 @@ All TestML documents are composed of the printable unicode character set
 and I<must> be encoded in UTF8. Any character that does not meet these
 requirements must cause an error.
 
-=head3  Valid Meta Keywords
+=head3 Valid Meta Keywords
 
 If the parser detects a meta keyword that is not listed below, it must
 cause an error.
