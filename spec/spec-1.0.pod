@@ -201,15 +201,15 @@ mostly borrowed from the PCRE regexp standard.
 
 =over
 
-=item * '|' - Alternation
+=item * ' | ' - Alternation
 
-=item * '-' - Exclusion
+=item * ' - ' - Exclusion
 
-=item * '*' - Zero or more
+=item * '* ' - Zero or more
 
-=item * '+' - One or more
+=item * '+ ' - One or more
 
-=item * '?' - Zero or one
+=item * '? ' - Zero or one
 
 =item * '(...)' - Parentheses indicate grouping
 
@@ -231,6 +231,8 @@ NOTE: There is a premise that only printable characters are allowed in a
 =item * BREAK - '\n' - A newline character
 
 =item * EOL - '\r?\n' - A Unix or DOS line ending
+
+=item * EOF - '$' - End of entire file/stream
 
 =item * NON-SPACE - '\S' - A non-space character
 
@@ -256,9 +258,10 @@ NOTE: There is a premise that only printable characters are allowed in a
 
 =over
 
-=item document := head-section data-section
+=item document := meta-section test-section data-section?
 
-A TestML Document consists of 2 sections, a head section followed by a data section.
+A TestML Document consists of 3 sections, a meta section followed by a
+test section followed by an optional inline data section.
 
 Here is an example document:
 
@@ -280,7 +283,8 @@ Here is an example document:
     --- bar
     LK P
 
-=item head-section := ( meta-statement | test-statement | include-statements | comment | blank-line )+
+=item head-section :=
+    ( meta-statement | test-statement | comment | blank-line )+ terminator
 
 The head section contains both general information (meta statements)
 about the test document and the definitions of the assertions the test
@@ -304,10 +308,18 @@ valid values.
 
 A value is a non blank, non empty, single line phrase of characters.
 
-=item test-statement := data-expression SPACE+ operator SPACE+ data-expression EOL
+=item test-statement := data-expression | test-assertion
 
-A test statement is a declaration of a testing operation. A typical
-statement looks like:
+A test statement is a processing directive for running tests. A
+statement can either be a single data-expression, which causes code to
+run but doesn't execute tests, or it can be an assertion which runs a
+test operation by comparing the results of two data expressions.
+
+=item test-assertion :=
+    data-expression SPACE+ operator SPACE+ data-expression EOL
+
+A test assertion is a declaration of a testing operation. A typical
+assertion looks like:
 
     input-point.transform1().transform2(arguments) == expected-output-point
 
@@ -366,21 +378,6 @@ backslash, double quote, newline or tab character.
 
     .bar("\tline 1\n\"line\" 2\n")
 
-=item include-statements :=
-    include-statement ( include-statement | comment | blank-line )*
-
-A group of adjacent include statements is processed at once. All of the
-files are included into the current document stream and then parsing
-continues. Doing them as a group allows multiple files to be included in
-the data section, where '%include' statements are no longer recognized.
-
-=item include-statement := '%include' SPACE relative-file-path EOL
-
-An include statement causes the named relative file to be read. The file
-contents replace the include statement and are immediately parsed.
-
-The included file must end with a newline, unless the file is empty.
-
 =item blank-line := SPACE* EOL
 
 Blank lines are useful to space things out visually.
@@ -389,6 +386,11 @@ Blank lines are useful to space things out visually.
 
 A comment is a line that begins with a '#'. A '#' anywhere else on a
 line will not start a comment.
+
+=item terminator := ('...' EOL) | EOF
+
+A '...' line terminates the head section. The remaining content, if any,
+is considered the data section.
 
 =item data-section := testml-data-section | yaml-data-section | json-data-section | xml-data-section
 
@@ -434,12 +436,12 @@ Here is an example data section in JSON:
 
     [
       {
-        "-label: "Test one",
+        "-label": "Test one",
         "input": "abc",
         "output": "123"
       },
       {
-        "-label: "Test two",
+        "-label": "Test two",
         "input": "xyz",
         "output": "321"
       }
@@ -606,12 +608,6 @@ it is for the data point marker.
     testml_point_marker: +++
 
 =back
-
-=head3 Include Files
-
-Files are included by a relative path. If the file does not exist, and
-thus can not be included, it must be considered an error. Recursive
-inclusion must also be detected and cause an error.
 
 =head1 Authors
 
