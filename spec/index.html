@@ -99,7 +99,7 @@ transform to invoke the Foo library's upper casing facility.</a></strong>
 <h1><a name="history">History</a></h1>
 <p>The concept of TestML was heavily inspired by Ward Cunningham's <strong>FIT</strong>
 test framework. The primary difference is that FIT's test documents are
-table/spreadsheet based, where TestML's are text file based. This belies
+table/spreadsheet based, where TestML's are text file based. This reflects
 the premise that FIT caters to business application development (where
 spreadsheets are heavily used), while TestML caters to open source
 library authors (where everything is in text files).</p>
@@ -107,14 +107,14 @@ library authors (where everything is in text files).</p>
 directly from Ingy döt Net's data-driven Perl testing framework,
 <strong>Test::Base</strong>. Test::Base was written in 2004 and later ported to
 JavaScript. As Ingy ported various libraries to other languages, he
-realized the potential value of having the test suites be reusable.</p>
+realized the potential value of making the test suites reusable.</p>
 <p>
 </p>
 <hr />
 <h1><a name="design_goals">Design Goals</a></h1>
 <p>TestML has the following Design Goals:</p>
 <dl>
-<dt><strong><a name="platform_agnostic" class="item">Platform Agnostic</a></strong>
+<dt><strong><a name="platform_agnosticism" class="item">Platform Agnosticism</a></strong>
 
 <dd>
 <p>TestML strives to make no assumptions about the programming language,
@@ -170,8 +170,7 @@ terms and defines their meanings.</p>
 
 <dd>
 <p>A <em>test assertion</em> is a statement in the <em>TestML document</em> that
-compares two <em>data points</em> using a <em>testing operator</em>, after they have
-been passed through a set of <em>data transforms</em>.</p>
+compares two <em>data expressions</em> using a <em>testing operator</em>.</p>
 </dd>
 </li>
 <dt><strong><a name="block" class="item">Block</a></strong>
@@ -254,10 +253,10 @@ the <em>data blocks</em> against which the test assertions are applied.</p>
 
 <dd>
 <p>A <em>transform</em> is a method provided by a <em>bridge class</em> that changes a
-<em>data point</em> form one form into another. A transform usually invokes
+<em>data point</em> from one form into another. A transform usually invokes
 functionality of the <em>application</em> it is testing. The whole idea of
 TestML is that by passing a data point through one or more transforms,
-you can make it equivalent to some other data point, which causes the
+you can make it equivalent to some other data point, causing the
 test to pass.</p>
 </dd>
 </li>
@@ -266,8 +265,8 @@ test to pass.</p>
 </p>
 <hr />
 <h1><a name="the_specification">The Specification</a></h1>
-<p>To simplify the TestML Specification, it is defined as both a <em>set of
-BNF grammars</em>, and a <em>set of constraints</em>. The grammars include a <em>top
+<p>To simplify the TestML Specification, it is defined by both a <em>set of
+BNF grammars</em> and a <em>set of constraints</em>. The grammars include a <em>top
 level document grammar</em> and a separate <em>TestML data section grammar</em>.
 The data section is separate, because it may be marked up in any of
 several syntaxes.</p>
@@ -385,7 +384,7 @@ that point forward.</p>
 <dt><strong><a name="keyword_word" class="item">keyword := WORD*</a></strong>
 
 <dd>
-<p>A keyword is the name of a meta setting. See Constraints for the
+<p>A keyword is the name of a meta setting. See <a href="#valid_meta_keywords">Valid Meta Keywords</a> for the
 valid values.</p>
 </dd>
 </li>
