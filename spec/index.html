@@ -33,7 +33,6 @@
 
 			<li><a href="#document_encoding">Document Encoding</a></li>
 			<li><a href="#valid_meta_keywords">Valid Meta Keywords</a></li>
-			<li><a href="#include_files">Include Files</a></li>
 		</ul>
 
 	</ul>
@@ -278,15 +277,15 @@ several syntaxes.</p>
 <p>This is a list of the special characters used in the grammars. They are
 mostly borrowed from the PCRE regexp standard.</p>
 <ul>
-<li><strong><a name="alternation" class="item">'|' - Alternation</a></strong>
+<li><strong><a name="alternation" class="item">' | ' - Alternation</a></strong>
 
-<li><strong><a name="exclusion" class="item">'-' - Exclusion</a></strong>
+<li><strong><a name="exclusion" class="item">' - ' - Exclusion</a></strong>
 
-<li><strong><a name="zero_or_more" class="item">'*' - Zero or more</a></strong>
+<li><strong><a name="zero_or_more" class="item">'* ' - Zero or more</a></strong>
 
-<li><strong><a name="one_or_more" class="item">'+' - One or more</a></strong>
+<li><strong><a name="one_or_more" class="item">'+ ' - One or more</a></strong>
 
-<li><strong><a name="zero_or_one" class="item">'?' - Zero or one</a></strong>
+<li><strong><a name="zero_or_one" class="item">'? ' - Zero or one</a></strong>
 
 <li><strong><a name="parentheses_indicate_grouping" class="item">'(...)' - Parentheses indicate grouping</a></strong>
 
@@ -304,6 +303,8 @@ equivalents.</p>
 <li><strong><a name="break_n_a_newline_character" class="item">BREAK - '\n' - A newline character</a></strong>
 
 <li><strong><a name="eol_r_n_a_unix_or_dos_line_ending" class="item">EOL - '\r?\n' - A Unix or DOS line ending</a></strong>
+
+<li><strong><a name="eof_end_of_entire_file_stream" class="item">EOF - '$' - End of entire file/stream</a></strong>
 
 <li><strong><a name="non_space_s_a_non_space_character" class="item">NON-SPACE - '\S' - A non-space character</a></strong>
 
@@ -328,10 +329,11 @@ equivalents.</p>
 </p>
 <h2><a name="top_level_document_grammar">Top Level Document Grammar</a></h2>
 <dl>
-<dt><strong><a name="document_head_section_data_section" class="item">document := head-section data-section</a></strong>
+<dt><strong><a name="document_meta_section_test_section_data_section" class="item">document := meta-section test-section data-section?</a></strong>
 
 <dd>
-<p>A TestML Document consists of 2 sections, a head section followed by a data section.</p>
+<p>A TestML Document consists of 3 sections, a meta section followed by a
+test section followed by an optional inline data section.</p>
 </dd>
 <dd>
 <p>Here is an example document:</p>
@@ -359,7 +361,8 @@ equivalents.</p>
     LK P</pre>
 </dd>
 </li>
-<dt><strong><a name="head_section_meta_statement_test_statement_include_statements_comment_blank_line" class="item">head-section := ( meta-statement | test-statement | include-statements | comment | blank-line )+</a></strong>
+<dt><strong><a name="head_section_meta_statement_test_statement_comment_blank_line_terminator" class="item">head-section :=
+    ( meta-statement | test-statement | comment | blank-line )+ terminator</a></strong>
 
 <dd>
 <p>The head section contains both general information (meta statements)
@@ -392,11 +395,21 @@ valid values.</p>
 <p>A value is a non blank, non empty, single line phrase of characters.</p>
 </dd>
 </li>
-<dt><strong><a name="test_statement_data_expression_space_operator_space_data_expression_eol" class="item">test-statement := data-expression SPACE+ operator SPACE+ data-expression EOL</a></strong>
+<dt><strong><a name="test_statement_data_expression_test_assertion" class="item">test-statement := data-expression | test-assertion</a></strong>
 
 <dd>
-<p>A test statement is a declaration of a testing operation. A typical
-statement looks like:</p>
+<p>A test statement is a processing directive for running tests. A
+statement can either be a single data-expression, which causes code to
+run but doesn't execute tests, or it can be an assertion which runs a
+test operation by comparing the results of two data expressions.</p>
+</dd>
+</li>
+<dt><strong><a name="test_assertion_data_expression_space_operator_space_data_expression_eol" class="item">test-assertion :=
+    data-expression SPACE+ operator SPACE+ data-expression EOL</a></strong>
+
+<dd>
+<p>A test assertion is a declaration of a testing operation. A typical
+assertion looks like:</p>
 </dd>
 <dd>
 <pre>
@@ -484,26 +497,6 @@ backslash, double quote, newline or tab character.</p>
     .bar(&quot;\tline 1\n\&quot;line\&quot; 2\n&quot;)</pre>
 </dd>
 </li>
-<dt><strong><a name="statement" class="item">include-statements :=
-    include-statement ( include-statement | comment | blank-line )*</a></strong>
-
-<dd>
-<p>A group of adjacent include statements is processed at once. All of the
-files are included into the current document stream and then parsing
-continues. Doing them as a group allows multiple files to be included in
-the data section, where '%include' statements are no longer recognized.</p>
-</dd>
-</li>
-<dt><strong><a name="include_statement_include_space_relative_file_path_eol" class="item">include-statement := '%include' SPACE relative-file-path EOL</a></strong>
-
-<dd>
-<p>An include statement causes the named relative file to be read. The file
-contents replace the include statement and are immediately parsed.</p>
-</dd>
-<dd>
-<p>The included file must end with a newline, unless the file is empty.</p>
-</dd>
-</li>
 <dt><strong><a name="blank_line_space_eol" class="item">blank-line := SPACE* EOL</a></strong>
 
 <dd>
@@ -515,6 +508,13 @@ contents replace the include statement and are immediately parsed.</p>
 <dd>
 <p>A comment is a line that begins with a '#'. A '#' anywhere else on a
 line will not start a comment.</p>
+</dd>
+</li>
+<dt><strong><a name="terminator_eol_eof" class="item">terminator := ('...' EOL) | EOF</a></strong>
+
+<dd>
+<p>A '...' line terminates the head section. The remaining content, if any,
+is considered the data section.</p>
 </dd>
 </li>
 <dt><strong><a name="data_section_testml_data_section_yaml_data_section_json_data_section_xml_data_section" class="item">data-section := testml-data-section | yaml-data-section | json-data-section | xml-data-section</a></strong>
@@ -577,12 +577,12 @@ this format.</p>
 <pre>
     [
       {
-        &quot;-label: &quot;Test one&quot;,
+        &quot;-label&quot;: &quot;Test one&quot;,
         &quot;input&quot;: &quot;abc&quot;,
         &quot;output&quot;: &quot;123&quot;
       },
       {
-        &quot;-label: &quot;Test two&quot;,
+        &quot;-label&quot;: &quot;Test two&quot;,
         &quot;input&quot;: &quot;xyz&quot;,
         &quot;output&quot;: &quot;321&quot;
       }
@@ -804,12 +804,6 @@ it is for the data point marker.</p>
 </dd>
 </li>
 </dl>
-<p>
-</p>
-<h3><a name="include_files">Include Files</a></h3>
-<p>Files are included by a relative path. If the file does not exist, and
-thus can not be included, it must be considered an error. Recursive
-inclusion must also be detected and cause an error.</p>
 <p>
 </p>
 <hr />

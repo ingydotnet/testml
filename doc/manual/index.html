@@ -1,0 +1,248 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+    <title>TestML - Testing Meta Language</title>
+    <link href="../../css/general.css" rel="stylesheet" type="text/css">
+  <head>
+  <body>
+
+
+
+<!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
+
+<ul>
+
+	<li><a href="#testml_user_manual">TestML User Manual</a></li>
+	<li><a href="#status">Status</a></li>
+	<li><a href="#introduction_to_testml">Introduction to TestML</a></li>
+	<li><a href="#use_cases">Use Cases</a></li>
+	<li><a href="#internal_processing">Internal Processing</a></li>
+	<ul>
+
+		<li><a href="#document_processing">Document Processing</a></li>
+		<li><a href="#data_object_model">Data Object Model</a></li>
+		<li><a href="#the_testml_runtime_sequence">The TestML Runtime Sequence</a></li>
+	</ul>
+
+	<li><a href="#authors">Authors</a></li>
+	<li><a href="#license">License</a></li>
+	<li><a href="#copyright">Copyright</a></li>
+</ul>
+
+<hr name="index" />
+</div>
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="testml_user_manual">TestML User Manual</a></h1>
+<p>Welcome to TestML. This manual describes what TestML is, why and when
+you would use it, and how it works. Enjoy!</p>
+<p>
+</p>
+<hr />
+<h1><a name="status">Status</a></h1>
+<p>This documentation is in progress and reflects the current thinking for
+the eventual release of TestML 1.0.</p>
+<p>
+</p>
+<hr />
+<h1><a name="introduction_to_testml">Introduction to TestML</a></h1>
+<p>TestML is a meta language for writing software tests. When you write a
+corpus of TestML documents, you are in effect describing how the
+software should behave under various conditions. The conditions are
+expressed as human friendly and readable data points. Then you describe
+how that data should be manipulated against the application being
+developed/tested, and finally what assertions should hold true after all
+the transformation has occurred.</p>
+<p>The test descriptions in TestML documents do not</p>
+<p>
+</p>
+<hr />
+<h1><a name="use_cases">Use Cases</a></h1>
+<p>This section descibes specific use cases for TestML.</p>
+<p>
+</p>
+<hr />
+<h1><a name="internal_processing">Internal Processing</a></h1>
+<p>TestML is an abstract language. This section describes in very specific
+terms, how the abstract is applied to reality. In other words, when you
+run a TestML test, what actually happens.</p>
+<p>
+</p>
+<h2><a name="document_processing">Document Processing</a></h2>
+<p>Every TestML test run by a particular implementation's test harness
+calls a runner method with a specific TestML document and an associated
+bridge class. The runner parses the document and then invokes the
+runtime process on it.</p>
+<p>When a TestML document has been parsed, it is turned into an in-memory
+representation of the document and all its referenced parts. The
+document object contains 3 main parts, a meta object, a test program AST
+object, and a data object.</p>
+<p>The meta object is just a simple mapping of TestML settings to their
+values. The meta section is used by the parser for information on how to
+parse the TestML document and turn it into a document object.</p>
+<p>The test program AST object is the compiled form the test code from
+the TestML document. It is run by the runtime against the data in the
+data object.</p>
+<p>The data object contains all the compiled data from both the inline data
+section and any referenced external data files.</p>
+<p>
+</p>
+<h2><a name="data_object_model">Data Object Model</a></h2>
+<p>The data object can be thought of as a sequence (or list or array)
+of labeled mappings (or hashes or dictionaries). The mappings are called
+data blocks. All of the keys of the blocks are ASCII identifier words
+and all the values are unicode strings.</p>
+<p>Each of the separate data sections (from multiple sources) that are
+parsed, produce a sequence of mappings. The sequences are simply
+concatenated into one sequence in the data object.</p>
+<p>The data object has methods for iterating over its contents.</p>
+<p>
+</p>
+<h2><a name="the_testml_runtime_sequence">The TestML Runtime Sequence</a></h2>
+<p>The runtime execution of TestML is somewhat complex despite the
+simplicity of its testing syntax. This section describes exactly what is
+happening when a given testml command is executed.</p>
+<p>Suppose you have the following testml document:</p>
+<pre>
+    testml: 1.0
+    input.some_process() == output;
+    ===
+    input: xxx
+    output: yyy
+    ===
+    input: zzz
+    nonsense: qwerty
+    ===
+    input: abc
+    output: def</pre>
+<p>The program test code here is:</p>
+<pre>
+    input.some_process() == output;</pre>
+<p>It looks at all the data blocks that have both input and output data
+points, runs each input through the bridge method <code>some_process</code> and
+compares it to the corresponding output.</p>
+<p>In effect, this is what happens, but the actual steps to make that
+happen are much more involved.</p>
+<dl>
+<dt><strong><a name="the_data_block_set" class="item">The Data Block Set</a></strong>
+
+<dd>
+<p>Every test command has a set containing zero or more data blocks. In
+this case, the set contains two blocks (the ones with both input and
+output points).</p>
+</dd>
+<dd>
+<p>When a command is compiled the AST contains a list of all the referenced
+data points. The data block set consists of all the defined data blocks
+that contain each of the referenced data points.</p>
+</dd>
+<dd>
+<p>A command is run once for each data block in the set associated with
+that command.</p>
+</dd>
+<dd>
+<p>In our case the command can be thought of as:</p>
+</dd>
+<dd>
+<pre>
+    block.input.some_process() == block.output;</pre>
+</dd>
+<dd>
+<p>Where block is the current data block that the test is being run
+against. The current block is known as the &quot;topic&quot;.</p>
+</dd>
+<dd>
+<pre>
+    topic().input.some_process() == topic().output;</pre>
+</dd>
+</li>
+<dt><strong><a name="the_current_value" class="item">The Current Value</a></strong>
+
+<dd>
+<p>The topic block is an object which has a current value. The value starts
+off undefined and then is set to the return value of each transform.
+Transforms names with no parentheses after them, simply set the topic
+value to the value of the named data point.</p>
+</dd>
+<dd>
+<pre>
+    topic().point_value('input').some_process() ==
+    topic().point_value('output');</pre>
+</dd>
+<dd>
+<p>If point_value returns the value of the named data point, then it would
+set the value of the topic by definition.</p>
+</dd>
+</li>
+<dt><strong><a name="transform_function_calling_convention" class="item">Transform Function Calling Convention</a></strong>
+
+<dd>
+<p>Each transform in an expression sequence, is passed the topic object
+followed by all the parenthesized arguments. The topic object can be
+used to access all the information in the test environment. If the
+function just wants the current topic value, it calls the <code>value</code>
+method on the topic object.</p>
+</dd>
+<dd>
+<p>Again, whatever value the transform function returns, that value is set
+as the topic object current value.</p>
+</dd>
+</li>
+<dt><strong><a name="comparison_method" class="item">Comparison Method</a></strong>
+
+<dd>
+<p>The '==' operator is really just visual sugar for the <code>.equals</code>
+comparison method.</p>
+</dd>
+<dd>
+<pre>
+    topic().point_value('input').some_process().equals(
+        topic().point_value('output')
+    );</pre>
+</dd>
+<dd>
+<p>It is the <code>equals</code> function that actually runs the test. It gets two
+different block objects passed to it, which in reality are the topics of
+two different expressions. Each topic has a value and those two values
+are unicode strings which are compared for equality.</p>
+</dd>
+<dd>
+<p>In reality, those values are passed to the Runner object, which runs the
+appropriate test code for the particular test environment in which
+everything is being run.</p>
+</dd>
+</li>
+</dl>
+<p>
+</p>
+<hr />
+<h1><a name="authors">Authors</a></h1>
+<ul>
+<li><strong><a name="ingy_d_t_net_ingy_ingy_net" class="item">Ingy döt Net &lt;<a href="mailto:ingy@ingy.net">ingy@ingy.net</a>&gt;</a></strong>
+
+</ul>
+<p>
+</p>
+<hr />
+<h1><a name="license">License</a></h1>
+<p>This work is licensed under the Creative Commons Attribution Share Alike
+License. To view a copy of this license, visit
+<a href="http://creativecommons.org/licenses/by-sa/3.0/legalcode">http://creativecommons.org/licenses/by-sa/3.0/legalcode</a>;
+or, (b) send a letter to Creative Commons, 171 2nd Street, Suite 300,
+San Francisco, California, 94105, USA.</p>
+<p>
+</p>
+<hr />
+<h1><a name="copyright">Copyright</a></h1>
+<p>Copyright (c) 2009. Ingy döt Net.</p>
+
+
+  </body>
+</html>
+
