@@ -25,18 +25,13 @@
 	<li><a href="#the_specification">The Specification</a></li>
 	<ul>
 
+		<li><a href="#document_encoding">Document Encoding</a></li>
 		<li><a href="#grammar_operators_and_primitives">Grammar Operators and Primitives</a></li>
 		<li><a href="#top_level_document_grammar">Top Level Document Grammar</a></li>
 		<li><a href="#testml_data_section_grammar">TestML Data Section Grammar</a></li>
-		<li><a href="#testml_document_constraints">TestML Document Constraints</a></li>
-		<ul>
-
-			<li><a href="#document_encoding">Document Encoding</a></li>
-			<li><a href="#valid_meta_keywords">Valid Meta Keywords</a></li>
-		</ul>
-
 	</ul>
 
+	<li><a href="#valid_meta_keywords">Valid Meta Keywords</a></li>
 	<li><a href="#authors">Authors</a></li>
 	<li><a href="#license">License</a></li>
 	<li><a href="#copyright">Copyright</a></li>
@@ -54,9 +49,10 @@
 </p>
 <hr />
 <h1><a name="status">Status</a></h1>
-<p>Working Draft - 10 May, 2009</p>
+<p>Working Draft - 16 May, 2009</p>
 <p>This document is not the final 1.0 release. It is very new, under
-review, and undergoing initial implementation and testing.</p>
+review, under revision and undergoing initial implementation and
+testing.</p>
 <p>
 </p>
 <hr />
@@ -69,17 +65,21 @@ relevant in many languages, or that have multiple implementations in the
 same language. In these scenarios the different implementations can all
 use the exact same tests. However, TestML's clarity and ease of use may
 make it desirable for testing all types of software.</p>
-<p>TestML documents define a set of data points and an abstract set of
-transforms that invoke the application being tested. The transforms
-alter given data points into new states. Then assertions can be made
-between the altered data points and expected result data points. Here is
-a simple example:</p>
+<p>TestML documents define a set of data points and a program written in
+an abstract transform/assertion language that invokes the application
+being tested. The transforms alter given data points into new states.
+Then assertions can be made between the altered data points and
+expected result data points. Here is a simple, but complete, TestML
+document example:</p>
 <pre>
-    testml: 1.0
-    input.uppercase() == output
+    testml: 1.0</pre>
+<pre>
+    input.uppercase() == output;</pre>
+<pre>
     === Test mixed case string
     --- input: I Like Pie
-    --- output: I LIKE PIE
+    --- output: I LIKE PIE</pre>
+<pre>
     === Test lower case string
     --- input: i love lucy
     --- output: I LOVE LUCY</pre>
@@ -103,11 +103,11 @@ table/spreadsheet based, where TestML's are text file based. This reflects
 the premise that FIT caters to business application development (where
 spreadsheets are heavily used), while TestML caters to open source
 library authors (where everything is in text files).</p>
-<p>The specifics of TestML, and the data format specifically, evolved
-directly from Ingy döt Net's data-driven Perl testing framework,
-<strong>Test::Base</strong>. Test::Base was written in 2004 and later ported to
-JavaScript. As Ingy ported various libraries to other languages, he
-realized the potential value of making the test suites reusable.</p>
+<p>The specifics of TestML (especially the data format), evolved directly
+from Ingy döt Net's data-driven Perl testing framework, <strong>Test::Base</strong>.
+Test::Base was written in 2004 and later ported to JavaScript. As Ingy
+ported various libraries to other languages, he realized the potential
+value of making the test suites reusable.</p>
 <p>
 </p>
 <hr />
@@ -128,8 +128,8 @@ implementations of equivalent software.</p>
 <dd>
 <p>TestML lets you define tests that are easy for both you and others to
 write, read and maintain. The format is intended to let the data points
-and test conditions stand out, while hiding the details of
-implementation in the <em>bridge class</em>.</p>
+and test conditions stand out, while keeping the implementation specific
+details in the <em>bridge class</em>.</p>
 </dd>
 </li>
 <dt><strong><a name="extensibility" class="item">Extensibility</a></strong>
@@ -186,9 +186,9 @@ points</em> needed by the assertion.</p>
 <dt><strong><a name="bridge" class="item">Bridge</a></strong>
 
 <dd>
-<p>Every test setup defines a class that connects named <em>data transforms</em>
-to the software being tested. This is known as a <em>bridge class</em>,
-because it bridges the test to the application or library.</p>
+<p>Every test setup defines a class that connects named <em>data transform</em>
+functions to the software being tested. This is known as a <em>bridge
+class</em>, because it bridges the test to the application or library.</p>
 </dd>
 </li>
 <dt><strong><a name="document" class="item">Document</a></strong>
@@ -265,11 +265,19 @@ test to pass.</p>
 </p>
 <hr />
 <h1><a name="the_specification">The Specification</a></h1>
-<p>To simplify the TestML Specification, it is defined by both a <em>set of
-BNF grammars</em> and a <em>set of constraints</em>. The grammars include a <em>top
-level document grammar</em> and a separate <em>TestML data section grammar</em>.
-The data section is separate, because it may be marked up in any of
-several syntaxes.</p>
+<p>The TestML Specification it is defined by a set of pseudo-BNF grammars.
+The grammars include a <em>top level document grammar</em> and a separate
+<em>TestML data section grammar</em>. The data section is separate, because it
+may be marked up in any of several syntaxes.</p>
+<p>NOTE: The grammar is somewhat self-modifying, because certain meta
+      settings in the document can change how the rest of the document
+      is parsed.</p>
+<p>
+</p>
+<h2><a name="document_encoding">Document Encoding</a></h2>
+<p>All TestML documents are composed of the printable unicode character set
+and <em>must</em> be encoded in UTF8. Any character that does not meet these
+requirements must raise an exception.</p>
 <p>
 </p>
 <h2><a name="grammar_operators_and_primitives">Grammar Operators and Primitives</a></h2>
@@ -291,10 +299,13 @@ mostly borrowed from the PCRE regexp standard.</p>
 </ul>
 <p>The following primitives are defined in terms of their PCRE regexp
 equivalents.</p>
-<p>NOTE: There is a premise that only printable characters are allowed in a
-      TestML document stream. The primitives therefore implicitly
-      exclude control characters and such.</p>
 <ul>
+<li><strong><a name="printable_x09_x0a_x0d_x20_x7e_xa0_x_d7ff_x_e000_x_fffd" class="item">PRINTABLE - '[\x09\x0A\x0D\x20-\x7E\xA0-\x{D7FF}\x{E000}-\x{FFFD}]'</a></strong>
+
+<p>NOTE: Non-PRINTABLE characters are not allowed in a TestML stream. The
+      following units do not allow them either, but they have been left
+      out of the regexps for simplicity sake.</p>
+</li>
 <li><strong><a name="any_s_s_any_unicode_character" class="item">ANY - '[\s\S]' - Any unicode character</a></strong>
 
 <li><strong><a name="space_t_a_space_or_tab_character" class="item">SPACE - '[\ \t]' - A space or tab character</a></strong>
@@ -303,17 +314,21 @@ equivalents.</p>
 
 <li><strong><a name="eol_r_n_a_unix_or_dos_line_ending" class="item">EOL - '\r?\n' - A Unix or DOS line ending</a></strong>
 
-<li><strong><a name="eof_end_of_entire_file_stream" class="item">EOF - '$' - End of entire file/stream</a></strong>
-
-<li><strong><a name="non_space_s_a_non_space_character" class="item">NON-SPACE - '\S' - A non-space character</a></strong>
-
 <li><strong><a name="non_break_any_character_except_newline" class="item">NON-BREAK - '.' - Any character except newline</a></strong>
 
-<li><strong><a name="alpha_a_za_z_ascii_alphabetic_character" class="item">ALPHA - '[A-Za-z]' - ASCII alphabetic character</a></strong>
+<li><strong><a name="lower_a_z_lower_case_ascii_alphabetic_character" class="item">LOWER - '[a-z]' - Lower case ASCII alphabetic character</a></strong>
 
-<li><strong><a name="alphanum_a_za_z0_9_ascii_alpha_numeric_character" class="item">ALPHANUM - '[A-Za-z0-9]' - ASCII alpha numeric character</a></strong>
+<li><strong><a name="upper_a_z_upper_case_ascii_alphabetic_character" class="item">UPPER - '[A-Z]' - Upper case ASCII alphabetic character</a></strong>
+
+<li><strong><a name="alphanum_a_za_z0_9_ascii_alphanumeric_character" class="item">ALPHANUM - '[A-Za-z0-9]' - ASCII alphanumeric character</a></strong>
 
 <li><strong><a name="word_w_ie_a_za_z0_9_a_word_character" class="item">WORD - '\w' - ie '[A-Za-z0-9_]' - A &quot;word&quot; character</a></strong>
+
+<li><strong><a name="digit_0_9_a_numeric_digit" class="item">DIGIT - '[0-9]' - A numeric digit</a></strong>
+
+<li><strong><a name="dot_a_period_character" class="item">DOT - '\.' - A period character</a></strong>
+
+<li><strong><a name="octothorpe" class="item">HASH - '#' - An octothorpe (or hash) character</a></strong>
 
 <li><strong><a name="back_a_backslash_character" class="item">BACK - '\' - A backslash character</a></strong>
 
@@ -321,7 +336,7 @@ equivalents.</p>
 
 <li><strong><a name="double_a_double_quote_character" class="item">DOUBLE - '&quot;' - A double quote character</a></strong>
 
-<li><strong><a name="escape_0abenrtz_one_of_the_escapable_character_ids" class="item">ESCAPE - '[0abenrtz]' - One of the escapable character IDs</a></strong>
+<li><strong><a name="escape_0nt_one_of_the_escapable_character_ids" class="item">ESCAPE - '[0nt]' - One of the escapable character IDs</a></strong>
 
 </ul>
 <p>
@@ -339,20 +354,28 @@ test section followed by an optional inline data section.</p>
 </dd>
 <dd>
 <pre>
-    # TestML document head section includes:
-    # Meta statements,
-    testml: 1.0
-    key1: value1
-    # And test assertions.
-    foo.upper() == bar
-    foo == bar.lower()</pre>
+    # TestML document includes:</pre>
 </dd>
 <dd>
 <pre>
-    # The data section defines data objects.
+    # Meta statements,
+    testml: 1.0</pre>
+</dd>
+<dd>
+<pre>
+    # And test statements.
+    foo.upper() == bar;
+    foo == bar.lower();</pre>
+</dd>
+<dd>
+<pre>
+    # And a data section that defines data blocks.
     === Test vowels
     --- foo: i ie ie
-    --- bar: I IE IE
+    --- bar: I IE IE</pre>
+</dd>
+<dd>
+<pre>
     === Test consonants
     --- foo
     lk p
@@ -360,20 +383,44 @@ test section followed by an optional inline data section.</p>
     LK P</pre>
 </dd>
 </li>
-<dt><strong><a name="head_section_meta_statement_test_statement_comment_blank_line_terminator" class="item">head-section :=
-    ( meta-statement | test-statement | comment | blank-line )+ terminator</a></strong>
+<dt><strong><a name="statement" class="item">meta-section :=
+    ( comment | blank-line )*
+    meta-testml-statement
+    ( meta-statement | comment | blank-line )*</a></strong>
 
 <dd>
-<p>The head section contains both general information (meta statements)
-about the test document and the definitions of the assertions the test
-is declaring (test statements).</p>
+<p>The meta section is the first section of the document. It must contain a
+testml version statement, and that statement must be the first meta
+statement declared.</p>
 </dd>
 <dd>
-<p>The parsing of the head section should instantiate two TestML objects:
-the Meta object and the Tests object.</p>
+<p>The parsing of the meta section should instantiate a Meta object.</p>
 </dd>
 </li>
-<dt><strong><a name="meta_statement_keyword_space_value_eol" class="item">meta-statement := keyword ':' SPACE+ value EOL</a></strong>
+<dt><strong><a name="comment_hash_line" class="item">comment := HASH line</a></strong>
+
+<dd>
+<p>Comments start with a '#' and go to the end of the line. Comments are
+only allowed where specifically permitted by the grammar. Comments are
+not used for any purpose in the TestML document object. In other words,
+they are thrown out.</p>
+</dd>
+</li>
+<dt><strong><a name="blank_line_space_eol" class="item">blank-line := SPACE* EOL</a></strong>
+
+<dd>
+<p>Blank lines are useful to space things out visually.</p>
+</dd>
+</li>
+<dt><strong><a name="version" class="item">meta-testml-statement :=
+    'testml:' SPACE+ testml-version ( SPACE+ comment | EOL )</a></strong>
+
+<dd>
+<p>The meta <code>testml</code> statement is required, must be the first meta
+statement, and must specify a valid TestML release version number.</p>
+</dd>
+</li>
+<dt><strong><a name="value" class="item">meta-statement := meta-keyword ':' SPACE+ meta-value (SPACE+ comment | EOL)</a></strong>
 
 <dd>
 <p>Meta statements are key/value pairs separated by a colon and a
@@ -381,30 +428,110 @@ SPACE. A given meta setting may affect the document parsing from
 that point forward.</p>
 </dd>
 </li>
-<dt><strong><a name="keyword_word" class="item">keyword := WORD*</a></strong>
+<dt><strong><a name="line_non_break_eol" class="item">line := NON-BREAK* EOL</a></strong>
 
 <dd>
-<p>A keyword is the name of a meta setting. See <a href="#valid_meta_keywords">Valid Meta Keywords</a> for the
-valid values.</p>
+<p>A line is a string of zero or more non break characters followed by
+a newline.</p>
 </dd>
 </li>
-<dt><strong><a name="space" class="item">value := NON-SPACE (NON-BREAK* NON-SPACE)?</a></strong>
+<dt><strong><a name="testml_version_digit_dot_digit" class="item">testml-version := DIGIT DOT DIGIT+</a></strong>
 
 <dd>
-<p>A value is a non blank, non empty, single line phrase of characters.</p>
+<p>Currently the only valid version number is '1.0'.</p>
 </dd>
 </li>
-<dt><strong><a name="test_statement_data_expression_test_assertion" class="item">test-statement := data-expression | test-assertion</a></strong>
+<dt><strong><a name="meta_keyword_title_tests_data_testml_block_marker_testml_point_marker_x_word" class="item">meta-keyword :=
+    ( 'title' | 'tests' | 'data' | 'testml_block_marker' | 'testml_point_marker') |
+    ( 'x_' WORD+ )</a></strong>
+
+<dd>
+<p>The listed keywords represent the meta settings supported in TestML 1.0.
+See <a href="#valid_meta_keywords">Valid Meta Keywords</a> for the definitions of them.</p>
+</dd>
+<dd>
+<p>A document also allows for user defined meta keywords that begin
+with 'x_'.</p>
+</dd>
+</li>
+<dt><strong><a name="meta_value_single_quoted_string_double_quoted_string_unquoted_string_space_comment_eol" class="item">meta-value := (
+    single-quoted-string |
+    double-quoted-string |
+    unquoted-string
+) (SPACE+ comment | EOL)</a></strong>
+
+<dd>
+<p>A meta value is the value of the meta setting being defined. Some settings
+like <code>data</code> are stored as arrays. Multiple statements with they same keyword
+add an element to the array.</p>
+</dd>
+</li>
+<dt><strong><a name="single" class="item">single-quoted-string :=
+    SINGLE ((ANY - (BREAK | BACK | SINGLE)) | BACK SINGLE | BACK BACK)* SINGLE</a></strong>
+
+<dd>
+<p>A single quoted string encodes the characters placed between the pair of
+single quotes. A backslash is used to encode a backslash or a single
+quote character.</p>
+</dd>
+<dd>
+<pre>
+    'Won\'t you scratch\\slash my back?'</pre>
+</dd>
+</li>
+<dt><strong><a name="double" class="item">double-quoted-string :=
+    DOUBLE ((ANY - (BREAK | BACK | DOUBLE)) |
+    BACK DOUBLE | BACK BACK | BACK ESCAPE )* DOUBLE</a></strong>
+
+<dd>
+<p>A double quoted string encodes the characters placed between the pair of
+double quotes. A backslash is used to encode a backslash or a double
+quote character, and also a tab, a newline or a null using the
+characters 't', 'n' or '0' respectively.</p>
+</dd>
+<dd>
+<pre>
+    &quot;\tline 1\n\&quot;line\&quot; 2\n&quot;</pre>
+</dd>
+</li>
+<dt><strong><a name="unquoted_string_any_space_break_hash_any_break_hash_any_space_break_hash" class="item">unquoted-string :=
+    (ANY - (SPACE | BREAK | HASH))
+    ((ANY - (BREAK | HASH))* (ANY - (SPACE | BREAK | HASH)))?</a></strong>
+
+<dd>
+<p>AN unquoted string is the first to last non-space characters on a line
+before an optional comment.</p>
+</dd>
+</li>
+<dt><strong><a name="test_section_test_statement_ws_comment_eol" class="item">test-section := ( test-statement | ws )* (comment | EOL)</a></strong>
+
+<dd>
+<p>The test section contains a small program written in the TestML
+programming language. This language is used to describe data
+transforms and the assertions that should hold. In other words, the
+testing program.</p>
+</dd>
+<dd>
+<p>The parsing of the meta section should instantiate a Test object.</p>
+</dd>
+</li>
+<dt><strong><a name="test_statement_data_expression_test_assertion" class="item">test-statement := ( data-expression | test-assertion ) ';'</a></strong>
 
 <dd>
 <p>A test statement is a processing directive for running tests. A
-statement can either be a single data-expression, which causes code to
+statement can either be a single data expression, which causes code to
 run but doesn't execute tests, or it can be an assertion which runs a
 test operation by comparing the results of two data expressions.</p>
 </dd>
 </li>
-<dt><strong><a name="test_assertion_data_expression_space_operator_space_data_expression_eol" class="item">test-assertion :=
-    data-expression SPACE+ operator SPACE+ data-expression EOL</a></strong>
+<dt><strong><a name="expression" class="item">data-expression := data-sub-expression ( call-indicator data-subexpression )*</a></strong>
+
+<dd>
+<p>A data expression is a series of one or more subexpressions which are
+evaluated in order, passing the result of each to the next one.</p>
+</dd>
+</li>
+<dt><strong><a name="test_assertion_data_expression_comparison_expression" class="item">test-assertion := data-expression comparison-expression</a></strong>
 
 <dd>
 <p>A test assertion is a declaration of a testing operation. A typical
@@ -415,54 +542,84 @@ assertion looks like:</p>
     input-point.transform1().transform2(arguments) == expected-output-point</pre>
 </dd>
 </li>
-<dt><strong><a name="data_expression_point_name_transform_call" class="item">data-expression := point-name transform-call*</a></strong>
+<dt><strong><a name="data_sub_expression_point_name_transform_call" class="item">data-sub-expression := point-name | transform-call</a></strong>
 
 <dd>
-<p>A data transform is a data point name followed by zero or more data
-transform calls.</p>
+<p>A sub expression can either be a plain point name or a transform
+function call.</p>
 </dd>
 </li>
-<dt><strong><a name="point_name_alpha_word" class="item">point-name := ALPHA WORD*</a></strong>
+<dt><strong><a name="call_indicator_dot_ws_ws_dot" class="item">call-indicator := (DOT ws*) | (ws* DOT)</a></strong>
 
 <dd>
-<p>A point name is the name of a data point defined in the data section of
-the document.</p>
+<p>A call indicator is a period between two sub expressions. The period
+must be adjecent to one of the sub expressions.</p>
 </dd>
 </li>
-<dt><strong><a name="transform_call_transform_name_argument_list" class="item">transform-call := '.' transform-name '(' argument-list ')'</a></strong>
+<dt><strong><a name="comparison_expression_ws_operator_ws_data_expression" class="item">comparison-expression := ws+ operator ws+ data-expression</a></strong>
 
 <dd>
-<p>A transform call is like a method call in Python. A '.' invokes a named
-transform/method with a list of arguments.</p>
-</dd>
-<dd>
-<pre>
-    .transform_name()</pre>
+<p>A comparison expression is an operator followed by a data expression
+that represents the expected value. The operator must have some
+whitespace on either side.</p>
 </dd>
 </li>
-<dt><strong><a name="transform_name_aplha_word" class="item">transform-name := APLHA WORD*</a></strong>
+<dt><strong><a name="point_name_lower_word" class="item">point-name := LOWER WORD*</a></strong>
 
 <dd>
-<p>A transform name is a like a method name in a programming language.</p>
-</dd>
-<dd>
-<pre>
-    thisIsTheTransformName</pre>
+<p>A data point name is an identifier that begins with a lower case letter.</p>
 </dd>
 </li>
-<dt><strong><a name="argument" class="item">argument-list := ( argument (',' SPACE argument)* )?</a></strong>
+<dt><strong><a name="transform_call_transform_name_ws_argument_list_ws" class="item">transform-call := transform-name '(' ws* argument-list ws* ')'</a></strong>
 
 <dd>
-<p>Currently the only thing allowed in an argument list is a list of
-strings. The list can be empty and usually is.</p>
+<p>A transform call consists of a transform name followed by parenthesized
+arguments.</p>
 </dd>
 </li>
-<dt><strong><a name="argument_point_name_quoted_string" class="item">argument := point-name | quoted-string</a></strong>
+<dt><strong><a name="ws_space_eol_comment" class="item">ws := SPACE | EOL | comment</a></strong>
 
 <dd>
-<p>An argument passed to a transform call can be a data point name or a
-quoted string. If it is a point name, the original value of that data
-point will be passed to the transform when the test is run.</p>
+<p>The <code>ws</code> token represents characters in the stream that can be
+thrown away.</p>
+</dd>
+</li>
+<dt><strong><a name="operator" class="item">operator := '=='</a></strong>
+
+<dd>
+<p>The only defined operator currently is <code>==</code>.</p>
+</dd>
+</li>
+<dt><strong><a name="transform_name_core_transform_name_user_transform_name" class="item">transform-name := core-transform-name | user-transform-name</a></strong>
+
+<dd>
+<p>A transform is either a standard core one, or a user defined transform.</p>
+</dd>
+</li>
+<dt><strong><a name="core_transform_name_upper_word" class="item">core-transform-name := UPPER WORD*</a></strong>
+
+<dd>
+<p>A core data transform is defined in the TestML Standard Library.</p>
+</dd>
+</li>
+<dt><strong><a name="user_transform_name_lower_word" class="item">user-transform-name := LOWER WORD*</a></strong>
+
+<dd>
+<p>A user data transform name is an identifier that begins with a lower case
+letter. These transforms are defined by the implementor in the
+bridge class.</p>
+</dd>
+</li>
+<dt><strong><a name="argument" class="item">argument-list := ( argument ( ws* ',' ws* argument )* )?</a></strong>
+
+<dd>
+<p>An argument is zero or more arguments.</p>
+</dd>
+</li>
+<dt><strong><a name="argument_data_expression_quoted_string" class="item">argument := data-expression | quoted-string</a></strong>
+
+<dd>
+<p>An argument can either be a data expression or a quoted string.</p>
 </dd>
 </li>
 <dt><strong><a name="quoted_string_single_quoted_string_double_quoted_string" class="item">quoted-string := single-quoted-string | double-quoted-string</a></strong>
@@ -471,60 +628,23 @@ point will be passed to the transform when the test is run.</p>
 <p>A quoted string can use either single or double quotes.</p>
 </dd>
 </li>
-<dt><strong><a name="single" class="item">single-quoted-string :=
-    SINGLE ((ANY - (BREAK | BACK | SINGLE)) | BACK SINGLE | BACK BACK)* SINGLE</a></strong>
+<dt><strong><a name="data_section_testml_data_section_yaml_data_section_json_data_section_xml_data_section" class="item">data-section :=
+    testml-data-section |
+    yaml-data-section |
+    json-data-section |
+    xml-data-section</a></strong>
 
 <dd>
-<p>A single quoted string has Perl semantics. A backslash is used to encode
-a backslash or a single quote character.</p>
+<p>The data section defines a sequence/array/list of data blocks, each of
+which is mapping/hash/dictionary consisting of an optional short label
+phrase and a set of named data points.</p>
 </dd>
 <dd>
-<pre>
-    .foo('Won\'t you scratch\\slash my back?')</pre>
-</dd>
-</li>
-<dt><strong><a name="double" class="item">double-quoted-string :=
-    DOUBLE ((ANY - (BREAK | BACK | DOUBLE)) |
-    BACK DOUBLE | BACK BACK | BACK ESCAPE )* DOUBLE</a></strong>
-
-<dd>
-<p>A double quoted string has limited backslash escaping. You can encode a
-backslash, double quote, newline or tab character.</p>
+<p>TestML defines a default data section syntax, but this section can also
+be specified in YAML, JSON or XML.</p>
 </dd>
 <dd>
-<pre>
-    .bar(&quot;\tline 1\n\&quot;line\&quot; 2\n&quot;)</pre>
-</dd>
-</li>
-<dt><strong><a name="blank_line_space_eol" class="item">blank-line := SPACE* EOL</a></strong>
-
-<dd>
-<p>Blank lines are useful to space things out visually.</p>
-</dd>
-</li>
-<dt><strong><a name="comment_line" class="item">comment := '#' line</a></strong>
-
-<dd>
-<p>A comment is a line that begins with a '#'. A '#' anywhere else on a
-line will not start a comment.</p>
-</dd>
-</li>
-<dt><strong><a name="terminator_eol_eof" class="item">terminator := ('...' EOL) | EOF</a></strong>
-
-<dd>
-<p>A '...' line terminates the head section. The remaining content, if any,
-is considered the data section.</p>
-</dd>
-</li>
-<dt><strong><a name="data_section_testml_data_section_yaml_data_section_json_data_section_xml_data_section" class="item">data-section := testml-data-section | yaml-data-section | json-data-section | xml-data-section</a></strong>
-
-<dd>
-<p>The data section defines a sequence of data objects, each of which
-consists of a short label phrase and a set of named data points.</p>
-</dd>
-<dd>
-<p>TestML defines a default syntax, but this section can also be specified
-in YAML, JSON or XML.</p>
+<p>The parsing of the data section should instantiate a Data object.</p>
 </dd>
 </li>
 <dt><strong><a name="marker" class="item">testml-data-section := testml-data-block-marker (SPACE | EOL) rest</a></strong>
@@ -598,8 +718,8 @@ this format.</p>
         &lt;output&gt;123&lt;/output&gt;
       &lt;/block&gt;
       &lt;block label=&quot;Test two&quot;&gt;
-        &quot;input&quot;: &quot;xyz&quot;,
-        &quot;output&quot;: &quot;321&quot;
+        &lt;input&gt;xyz&lt;/input&gt;
+        &lt;output&gt;321&lt;/output&gt;
       &lt;/block&gt;
     &lt;/testml&gt;</pre>
 </dd>
@@ -636,7 +756,7 @@ The <em>data sections</em> are all parsed by separate parsers/grammars.</p>
     data</pre>
 </dd>
 </li>
-<dt><strong>block-header := block-marker (SPACE block-label)? SPACE* EOL</strong>
+<dt><strong>block-header := block-marker (SPACE+ label)? SPACE* EOL</strong>
 
 <dd>
 <p>A block header marks the start of a new block. The first one also marks
@@ -647,7 +767,7 @@ the start of the data section. It contains an optional label.</p>
     === The next big test</pre>
 </dd>
 </li>
-<dt><strong><a name="block_marker_meta_testml_block_marker" class="item">block-marker := '===' | meta.testml_block_marker</a></strong>
+<dt><strong><a name="block_marker_meta_testml_block_marker" class="item">block-marker := '===' | Meta.testml_block_marker</a></strong>
 
 <dd>
 <p>A block marker is usually <code>===</code>, but it is configurable via a meta
@@ -658,6 +778,10 @@ statement, like this:</p>
     testml_block_marker: ***</pre>
 </dd>
 </li>
+<dt><strong><a name="label_any_space_break_non_break_any_space_break" class="item">label :=
+    (ANY - (SPACE | BREAK))
+    (NON-BREAK* (ANY - (SPACE | BREAK)))?</a></strong>
+
 <dt><strong><a name="data_point_lines_point_phrase_point" class="item">data-point := lines-point | phrase-point</a></strong>
 
 <dd>
@@ -665,11 +789,11 @@ statement, like this:</p>
 compares. They come in two flavors, lines and phrases.</p>
 </dd>
 </li>
-<dt><strong><a name="lines_point_point_marker_point_name_space_eol_line" class="item">lines-point := point-marker point-name SPACE* EOL line*</a></strong>
+<dt><strong><a name="eol" class="item">lines-point := point-marker SPACE+ point-name SPACE* EOL (line - block-header)*</a></strong>
 
 <dd>
-<p>A &quot;lines&quot; data point is a string containing zero or more lines. If it
-has one or more lines it always ends with a newline.</p>
+<p>A &quot;lines&quot; data point encodes a string containing zero or more lines. If
+it has one or more lines it always ends with a newline.</p>
 </dd>
 <dd>
 <pre>
@@ -680,17 +804,17 @@ has one or more lines it always ends with a newline.</p>
     line4</pre>
 </dd>
 </li>
-<dt><strong><a name="phrase_point_point_marker_point_name_space_non_break_eol_blank_line" class="item">phrase-point := point-marker point-name ':' SPACE NON-BREAK* EOL blank-line*</a></strong>
+<dt><strong><a name="phrase_point_point_marker_space_point_name_space_non_break_eol_blank_line" class="item">phrase-point := point-marker SPACE+ point-name ':' (SPACE NON-BREAK*)? EOL blank-line*</a></strong>
 
 <dd>
-<p>A &quot;phrase&quot; data point is a string with no newlines.</p>
+<p>A &quot;phrase&quot; data point encodes a string with no newlines.</p>
 </dd>
 <dd>
 <pre>
     --- phrase: This string is one line with no newline at the end.</pre>
 </dd>
 </li>
-<dt><strong><a name="point_marker_meta_testml_point_marker" class="item">point-marker := '---' | meta.testml_point_marker</a></strong>
+<dt><strong><a name="point_marker_meta_testml_point_marker" class="item">point-marker := '---' | Meta.testml_point_marker</a></strong>
 
 <dd>
 <p>A point marker is usually <code>---</code>, but it is configurable via a meta
@@ -701,38 +825,23 @@ statement, like this:</p>
     testml_point_marker: +++</pre>
 </dd>
 </li>
-<dt><strong><a name="line_non_break_eol" class="item">line := NON-BREAK* EOL</a></strong>
-
-<dd>
-<p>A line is a string of zero or more non break characters followed by
-a newline.</p>
-</dd>
-</li>
 </dl>
 <p>
 </p>
-<h2><a name="testml_document_constraints">TestML Document Constraints</a></h2>
-<p>The above grammars define the valid syntax for a TestML document, but
-there is a also set of constraints that all TestML documents must
-adhere to.</p>
-<p>
-</p>
-<h3><a name="document_encoding">Document Encoding</a></h3>
-<p>All TestML documents are composed of the printable unicode character set
-and <em>must</em> be encoded in UTF8. Any character that does not meet these
-requirements must cause an error.</p>
-<p>
-</p>
-<h3><a name="valid_meta_keywords">Valid Meta Keywords</a></h3>
-<p>If the parser detects a meta keyword that is not listed below, it must
-cause an error.</p>
+<hr />
+<h1><a name="valid_meta_keywords">Valid Meta Keywords</a></h1>
+<p>The following meta section keywords are supported by TestML 1.0.</p>
 <dl>
 <dt><strong><a name="testml_required" class="item">testml - <strong>required</strong></a></strong>
 
 <dd>
-<p>The <em>testml</em> meta statement is required and it must specify a version
-number. The TestML implementation can then determine whether or not it
-can process the document or not.</p>
+<p>The <code>testml</code> meta statement is required, must be the first meta
+statement and must specify a valid TestML release version number.</p>
+</dd>
+<dd>
+<p>Once the version number is known by the parser, it controls how the rest
+of the document is parsed. If the parser does not support the specified
+version number, it must raise an exception.</p>
 </dd>
 <dd>
 <p>For example:</p>
@@ -742,10 +851,10 @@ can process the document or not.</p>
     testml: 1.0</pre>
 </dd>
 <dd>
-<p>As a guideline, TestML will attempt to be backwards compatible with
-version numbers that have the same first number. So version 1.3 would be
-backwards compatible with 1.2, 1.1 and 1.0. Version 2.0 would probably
-break compatability.</p>
+<p>As a guideline, the TestML specification authors will attempt to be
+backwards compatible with version numbers that have the same first
+number. So version 1.3 would be backwards compatible with 1.2, 1.1 and
+1.0. Version 2.0 would probably break compatability.</p>
 </dd>
 </li>
 <dt><strong><a name="title_optional" class="item">title - <em>optional</em></a></strong>
@@ -767,11 +876,46 @@ entire TestML document.</p>
 <dd>
 <p>The <em>tests</em> meta option specifies the expected number of tests that
 will be run by the runner. If the actual number differs the
-implementation may complain or throw an error.</p>
+implementation may complain or raise an exception.</p>
 </dd>
 <dd>
 <pre>
     tests: 13</pre>
+</dd>
+</li>
+<dt><strong><a name="data_optional" class="item">data - <em>optional</em></a></strong>
+
+<dd>
+<p>The <em>data</em> meta option can be specified zero, one or multiple times. It
+names a relative file path that should be read and parsed as a data
+section. The resulting sequences of all the data files are concatenated
+together into the Data object.</p>
+</dd>
+<dd>
+<p>By default, the inline data section comes first when other data sources are
+specified. A special file path name '_' can be used to indicate the inline
+data section.</p>
+</dd>
+<dd>
+<p>The file extension is used to determine the format of the data section encoded
+in the file.</p>
+</dd>
+<dd>
+<p>Example:</p>
+</dd>
+<dd>
+<pre>
+    data: file1.tml
+    data: file2.xml
+    data: _
+    data: file4.yaml</pre>
+</dd>
+<dd>
+<p>A file extension can be added to the inline pseudoname, like '_.xml', but this
+is usually not necessary.</p>
+</dd>
+<dd>
+<p>The data attribute of the Meta object is always stored as an array.</p>
 </dd>
 </li>
 <dt><strong><a name="testml_block_marker_optional" class="item">testml_block_marker - <em>optional</em></a></strong>
