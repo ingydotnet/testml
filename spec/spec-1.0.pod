@@ -322,6 +322,11 @@ only allowed where specifically permitted by the grammar. Comments are
 not used for any purpose in the TestML document object. In other words,
 they are thrown out.
 
+=item line := NON-BREAK* EOL
+
+A line is a string of zero or more non break characters followed by
+a newline.
+
 =item blank-line := SPACE* EOL
 
 Blank lines are useful to space things out visually.
@@ -332,20 +337,15 @@ Blank lines are useful to space things out visually.
 The meta C<testml> statement is required, must be the first meta
 statement, and must specify a valid TestML release version number.
 
+=item testml-version := DIGIT DOT DIGIT+
+
+Currently the only valid version number is '1.0'.
+
 =item meta-statement := meta-keyword ':' SPACE+ meta-value (SPACE+ comment | EOL)
 
 Meta statements are key/value pairs separated by a colon and a
 SPACE. A given meta setting may affect the document parsing from
 that point forward.
-
-=item line := NON-BREAK* EOL
-
-A line is a string of zero or more non break characters followed by
-a newline.
-
-=item testml-version := DIGIT DOT DIGIT+
-
-Currently the only valid version number is '1.0'.
 
 =item meta-keyword :=
     ( 'title' | 'tests' | 'data' | 'testml_block_marker' | 'testml_point_marker') |
@@ -415,32 +415,31 @@ test operation by comparing the results of two data expressions.
 A data expression is a series of one or more subexpressions which are
 evaluated in order, passing the result of each to the next one.
 
-=item test-assertion := data-expression comparison-expression
+=item call-indicator := (DOT ws*) | (ws* DOT)
 
-A test assertion is a declaration of a testing operation. A typical
-assertion looks like:
-
-    input-point.transform1().transform2(arguments) == expected-output-point
+A call indicator is a period between two sub expressions. The period
+must be adjecent to one of the sub expressions.
 
 =item data-sub-expression := point-name | transform-call
 
 A sub expression can either be a plain point name or a transform
 function call.
 
-=item call-indicator := (DOT ws*) | (ws* DOT)
+=item point-name := user-point-name | core-point-name
 
-A call indicator is a period between two sub expressions. The period
-must be adjecent to one of the sub expressions.
+A data point name is either a user defined data point, or a core global
+data point.
 
-=item comparison-expression := ws+ operator ws+ data-expression
+=item user-point-name := LOWER WORD*
 
-A comparison expression is an operator followed by a data expression
-that represents the expected value. The operator must have some
-whitespace on either side.
+A user data point name begins with a lower case letter. It refers to an
+element of the current data block.
 
-=item point-name := LOWER WORD*
+=item core-point-name := UPPER WORD*
 
-A data point name is an identifier that begins with a lower case letter.
+A core data point name begins with an upper case letter. It refers to an
+element of the standard library global data block. It contains things like
+True, False, Null and PI.
 
 =item transform-call := transform-name '(' ws* argument-list ws* ')'
 
@@ -452,23 +451,19 @@ arguments.
 The C<ws> token represents characters in the stream that can be
 thrown away.
 
-=item operator := '=='
-
-The only defined operator currently is C<==>.
-
-=item transform-name := core-transform-name | user-transform-name
+=item transform-name := user-transform-name | core-transform-name
 
 A transform is either a standard core one, or a user defined transform.
-
-=item core-transform-name := UPPER WORD*
-
-A core data transform is defined in the TestML Standard Library.
 
 =item user-transform-name := LOWER WORD*
 
 A user data transform name is an identifier that begins with a lower case
 letter. These transforms are defined by the implementor in the
 bridge class.
+
+=item core-transform-name := UPPER WORD*
+
+A core data transform is defined in the TestML Standard Library.
 
 =item argument-list := ( argument ( ws* ',' ws* argument )* )?
 
@@ -481,6 +476,45 @@ An argument can either be a data expression or a quoted string.
 =item quoted-string := single-quoted-string | double-quoted-string
 
 A quoted string can use either single or double quotes.
+
+=item test-assertion := data-expression assertion-expression
+
+A test assertion is a declaration of a testing operation. A typical
+assertion looks like:
+
+    input-point.transform1().transform2(arguments) == expected-output-point
+
+=item assertion-expression := inline-assertion | function-assertion
+
+An assertion expression can either be an inline operator expression:
+
+    foo == bar
+
+or a function call:
+
+    foo.EQ(bar)
+
+=item inline-assertion-expression := ws+ assertion-operator ws+ data-expression
+
+An assertion expression is an operator followed by a data expression
+that represents the expected value. The operator must have some
+whitespace on either side.
+
+=item assertion-operator := '=='
+
+The only defined assertion operator currently is '==', which maps to 'EQ'.
+
+=item function-assertion :=
+    call-indicator assertion-name '(' ws* data-expression ws* ')'
+
+A function assertion 
+
+=item assertion-name := UPPER*
+
+An assertion name is the name of an assertion function defined by the
+standard library. For this reason it begins with an upper case letter.
+
+The only defined assertion name currently is 'EQ'.
 
 =item data-section :=
     testml-data-section |
@@ -607,7 +641,7 @@ statement, like this:
 Data points are the pieces of raw data that TestML transforms and
 compares. They come in two flavors, lines and phrases.
 
-=item lines-point := point-marker SPACE+ point-name SPACE* EOL (line - block-header)*
+=item lines-point := point-marker SPACE+ user-point-name SPACE* EOL (line - block-header)*
 
 A "lines" data point encodes a string containing zero or more lines. If
 it has one or more lines it always ends with a newline.
@@ -618,7 +652,7 @@ it has one or more lines it always ends with a newline.
     
     line4
 
-=item phrase-point := point-marker SPACE+ point-name ':' (SPACE NON-BREAK*)? EOL blank-line*
+=item phrase-point := point-marker SPACE+ user-point-name ':' (SPACE NON-BREAK*)? EOL blank-line*
 
 A "phrase" data point encodes a string with no newlines.
 
