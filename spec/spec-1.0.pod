@@ -4,10 +4,11 @@ A Software Testing Meta Language. Version 1.0.
 
 =head1 Status
 
-Working Draft - 10 May, 2009
+Working Draft - 16 May, 2009
 
 This document is not the final 1.0 release. It is very new, under
-review, and undergoing initial implementation and testing.
+review, under revision and undergoing initial implementation and
+testing.
 
 =head1 Overview
 
@@ -21,17 +22,21 @@ same language. In these scenarios the different implementations can all
 use the exact same tests. However, TestML's clarity and ease of use may
 make it desirable for testing all types of software.
 
-TestML documents define a set of data points and an abstract set of
-transforms that invoke the application being tested. The transforms
-alter given data points into new states. Then assertions can be made
-between the altered data points and expected result data points. Here is
-a simple example:
+TestML documents define a set of data points and a program written in
+an abstract transform/assertion language that invokes the application
+being tested. The transforms alter given data points into new states.
+Then assertions can be made between the altered data points and
+expected result data points. Here is a simple, but complete, TestML
+document example:
 
     testml: 1.0
-    input.uppercase() == output
+
+    input.uppercase() == output;
+
     === Test mixed case string
     --- input: I Like Pie
     --- output: I LIKE PIE
+
     === Test lower case string
     --- input: i love lucy
     --- output: I LOVE LUCY
@@ -58,11 +63,11 @@ the premise that FIT caters to business application development (where
 spreadsheets are heavily used), while TestML caters to open source
 library authors (where everything is in text files).
 
-The specifics of TestML, and the data format specifically, evolved
-directly from Ingy döt Net's data-driven Perl testing framework,
-B<Test::Base>. Test::Base was written in 2004 and later ported to
-JavaScript. As Ingy ported various libraries to other languages, he
-realized the potential value of making the test suites reusable.
+The specifics of TestML (especially the data format), evolved directly
+from Ingy döt Net's data-driven Perl testing framework, B<Test::Base>.
+Test::Base was written in 2004 and later ported to JavaScript. As Ingy
+ported various libraries to other languages, he realized the potential
+value of making the test suites reusable.
 
 =head1 Design Goals
 
@@ -81,8 +86,8 @@ implementations of equivalent software.
 
 TestML lets you define tests that are easy for both you and others to
 write, read and maintain. The format is intended to let the data points
-and test conditions stand out, while hiding the details of
-implementation in the I<bridge class>.
+and test conditions stand out, while keeping the implementation specific
+details in the I<bridge class>.
 
 =item Extensibility
 
@@ -127,9 +132,9 @@ points> needed by the assertion.
 
 =item Bridge
 
-Every test setup defines a class that connects named I<data transforms>
-to the software being tested. This is known as a I<bridge class>,
-because it bridges the test to the application or library.
+Every test setup defines a class that connects named I<data transform>
+functions to the software being tested. This is known as a I<bridge
+class>, because it bridges the test to the application or library.
 
 =item Document
 
@@ -187,11 +192,20 @@ test to pass.
 
 =head1 The Specification
 
-To simplify the TestML Specification, it is defined by both a I<set of
-BNF grammars> and a I<set of constraints>. The grammars include a I<top
-level document grammar> and a separate I<TestML data section grammar>.
-The data section is separate, because it may be marked up in any of
-several syntaxes.
+The TestML Specification it is defined by a set of pseudo-BNF grammars.
+The grammars include a I<top level document grammar> and a separate
+I<TestML data section grammar>. The data section is separate, because it
+may be marked up in any of several syntaxes.
+
+NOTE: The grammar is somewhat self-modifying, because certain meta
+      settings in the document can change how the rest of the document
+      is parsed.
+
+=head2 Document Encoding
+
+All TestML documents are composed of the printable unicode character set
+and I<must> be encoded in UTF8. Any character that does not meet these
+requirements must raise an exception.
 
 =head2 Grammar Operators and Primitives
 
@@ -217,11 +231,13 @@ mostly borrowed from the PCRE regexp standard.
 The following primitives are defined in terms of their PCRE regexp
 equivalents.
 
-NOTE: There is a premise that only printable characters are allowed in a
-      TestML document stream. The primitives therefore implicitly
-      exclude control characters and such.
-
 =over
+
+=item * PRINTABLE - '[\x09\x0A\x0D\x20-\x7E\xA0-\x{D7FF}\x{E000}-\x{FFFD}]'
+
+NOTE: Non-PRINTABLE characters are not allowed in a TestML stream. The
+      following units do not allow them either, but they have been left
+      out of the regexps for simplicity sake.
 
 =item * ANY - '[\s\S]' - Any unicode character
 
@@ -231,17 +247,21 @@ NOTE: There is a premise that only printable characters are allowed in a
 
 =item * EOL - '\r?\n' - A Unix or DOS line ending
 
-=item * EOF - '$' - End of entire file/stream
-
-=item * NON-SPACE - '\S' - A non-space character
-
 =item * NON-BREAK - '.' - Any character except newline
 
-=item * ALPHA - '[A-Za-z]' - ASCII alphabetic character
+=item * LOWER - '[a-z]' - Lower case ASCII alphabetic character
 
-=item * ALPHANUM - '[A-Za-z0-9]' - ASCII alpha numeric character
+=item * UPPER - '[A-Z]' - Upper case ASCII alphabetic character
+
+=item * ALPHANUM - '[A-Za-z0-9]' - ASCII alphanumeric character
 
 =item * WORD - '\w' - ie '[A-Za-z0-9_]' - A "word" character
+
+=item * DIGIT - '[0-9]' - A numeric digit
+
+=item * DOT - '\.' - A period character
+
+=item * HASH - '#' - An octothorpe (or hash) character
 
 =item * BACK - '\' - A backslash character
 
@@ -249,7 +269,7 @@ NOTE: There is a premise that only printable characters are allowed in a
 
 =item * DOUBLE - '"' - A double quote character
 
-=item * ESCAPE - '[0abenrtz]' - One of the escapable character IDs
+=item * ESCAPE - '[0nt]' - One of the escapable character IDs
 
 =back 
 
@@ -264,140 +284,218 @@ test section followed by an optional inline data section.
 
 Here is an example document:
 
-    # TestML document head section includes:
+    # TestML document includes:
+
     # Meta statements,
     testml: 1.0
-    key1: value1
-    # And test assertions.
-    foo.upper() == bar
-    foo == bar.lower()
 
-    # The data section defines data objects.
+    # And test statements.
+    foo.upper() == bar;
+    foo == bar.lower();
+
+    # And a data section that defines data blocks.
     === Test vowels
     --- foo: i ie ie
     --- bar: I IE IE
+
     === Test consonants
     --- foo
     lk p
     --- bar
     LK P
 
-=item head-section :=
-    ( meta-statement | test-statement | comment | blank-line )+ terminator
+=item meta-section :=
+    ( comment | blank-line )*
+    meta-testml-statement
+    ( meta-statement | comment | blank-line )*
 
-The head section contains both general information (meta statements)
-about the test document and the definitions of the assertions the test
-is declaring (test statements).
+The meta section is the first section of the document. It must contain a
+testml version statement, and that statement must be the first meta
+statement declared.
 
-The parsing of the head section should instantiate two TestML objects:
-the Meta object and the Tests object.
+The parsing of the meta section should instantiate a Meta object.
 
-=item meta-statement := keyword ':' SPACE+ value EOL
+=item comment := HASH line
+
+Comments start with a '#' and go to the end of the line. Comments are
+only allowed where specifically permitted by the grammar. Comments are
+not used for any purpose in the TestML document object. In other words,
+they are thrown out.
+
+=item blank-line := SPACE* EOL
+
+Blank lines are useful to space things out visually.
+
+=item meta-testml-statement :=
+    'testml:' SPACE+ testml-version ( SPACE+ comment | EOL )
+
+The meta C<testml> statement is required, must be the first meta
+statement, and must specify a valid TestML release version number.
+
+=item meta-statement := meta-keyword ':' SPACE+ meta-value (SPACE+ comment | EOL)
 
 Meta statements are key/value pairs separated by a colon and a
 SPACE. A given meta setting may affect the document parsing from
 that point forward.
 
-=item keyword := WORD*
+=item line := NON-BREAK* EOL
 
-A keyword is the name of a meta setting. See L</Valid Meta Keywords> for the
-valid values.
+A line is a string of zero or more non break characters followed by
+a newline.
 
-=item value := NON-SPACE (NON-BREAK* NON-SPACE)?
+=item testml-version := DIGIT DOT DIGIT+
 
-A value is a non blank, non empty, single line phrase of characters.
+Currently the only valid version number is '1.0'.
 
-=item test-statement := data-expression | test-assertion
+=item meta-keyword :=
+    ( 'title' | 'tests' | 'data' | 'testml_block_marker' | 'testml_point_marker') |
+    ( 'x_' WORD+ )
+
+The listed keywords represent the meta settings supported in TestML 1.0.
+See L<Valid Meta Keywords> for the definitions of them.
+
+A document also allows for user defined meta keywords that begin
+with 'x_'.
+
+=item meta-value := (
+    single-quoted-string |
+    double-quoted-string |
+    unquoted-string
+) (SPACE+ comment | EOL)
+
+A meta value is the value of the meta setting being defined. Some settings
+like C<data> are stored as arrays. Multiple statements with they same keyword
+add an element to the array.
+
+=item single-quoted-string :=
+    SINGLE ((ANY - (BREAK | BACK | SINGLE)) | BACK SINGLE | BACK BACK)* SINGLE
+
+A single quoted string encodes the characters placed between the pair of
+single quotes. A backslash is used to encode a backslash or a single
+quote character.
+
+    'Won\'t you scratch\\slash my back?'
+
+=item double-quoted-string :=
+    DOUBLE ((ANY - (BREAK | BACK | DOUBLE)) |
+    BACK DOUBLE | BACK BACK | BACK ESCAPE )* DOUBLE
+
+A double quoted string encodes the characters placed between the pair of
+double quotes. A backslash is used to encode a backslash or a double
+quote character, and also a tab, a newline or a null using the
+characters 't', 'n' or '0' respectively.
+
+    "\tline 1\n\"line\" 2\n"
+
+=item unquoted-string :=
+    (ANY - (SPACE | BREAK | HASH))
+    ((ANY - (BREAK | HASH))* (ANY - (SPACE | BREAK | HASH)))?
+
+AN unquoted string is the first to last non-space characters on a line
+before an optional comment.
+
+=item test-section := ( test-statement | ws )* (comment | EOL)
+
+The test section contains a small program written in the TestML
+programming language. This language is used to describe data
+transforms and the assertions that should hold. In other words, the
+testing program.
+
+The parsing of the meta section should instantiate a Test object.
+
+=item test-statement := ( data-expression | test-assertion ) ';'
 
 A test statement is a processing directive for running tests. A
-statement can either be a single data-expression, which causes code to
+statement can either be a single data expression, which causes code to
 run but doesn't execute tests, or it can be an assertion which runs a
 test operation by comparing the results of two data expressions.
 
-=item test-assertion :=
-    data-expression SPACE+ operator SPACE+ data-expression EOL
+=item data-expression := data-sub-expression ( call-indicator data-subexpression )*
+
+A data expression is a series of one or more subexpressions which are
+evaluated in order, passing the result of each to the next one.
+
+=item test-assertion := data-expression comparison-expression
 
 A test assertion is a declaration of a testing operation. A typical
 assertion looks like:
 
     input-point.transform1().transform2(arguments) == expected-output-point
 
-=item data-expression := point-name transform-call*
+=item data-sub-expression := point-name | transform-call
 
-A data transform is a data point name followed by zero or more data
-transform calls.
+A sub expression can either be a plain point name or a transform
+function call.
 
-=item point-name := ALPHA WORD*
+=item call-indicator := (DOT ws*) | (ws* DOT)
 
-A point name is the name of a data point defined in the data section of
-the document.
+A call indicator is a period between two sub expressions. The period
+must be adjecent to one of the sub expressions.
 
-=item transform-call := '.' transform-name '(' argument-list ')'
+=item comparison-expression := ws+ operator ws+ data-expression
 
-A transform call is like a method call in Python. A '.' invokes a named
-transform/method with a list of arguments.
+A comparison expression is an operator followed by a data expression
+that represents the expected value. The operator must have some
+whitespace on either side.
 
-    .transform_name()
+=item point-name := LOWER WORD*
 
-=item transform-name := APLHA WORD*
+A data point name is an identifier that begins with a lower case letter.
 
-A transform name is a like a method name in a programming language.
+=item transform-call := transform-name '(' ws* argument-list ws* ')'
 
-    thisIsTheTransformName
+A transform call consists of a transform name followed by parenthesized
+arguments.
 
-=item argument-list := ( argument (',' SPACE argument)* )?
+=item ws := SPACE | EOL | comment
 
-Currently the only thing allowed in an argument list is a list of
-strings. The list can be empty and usually is.
+The C<ws> token represents characters in the stream that can be
+thrown away.
 
-=item argument := point-name | quoted-string
+=item operator := '=='
 
-An argument passed to a transform call can be a data point name or a
-quoted string. If it is a point name, the original value of that data
-point will be passed to the transform when the test is run.
+The only defined operator currently is C<==>.
+
+=item transform-name := core-transform-name | user-transform-name
+
+A transform is either a standard core one, or a user defined transform.
+
+=item core-transform-name := UPPER WORD*
+
+A core data transform is defined in the TestML Standard Library.
+
+=item user-transform-name := LOWER WORD*
+
+A user data transform name is an identifier that begins with a lower case
+letter. These transforms are defined by the implementor in the
+bridge class.
+
+=item argument-list := ( argument ( ws* ',' ws* argument )* )?
+
+An argument is zero or more arguments.
+
+=item argument := data-expression | quoted-string
+
+An argument can either be a data expression or a quoted string.
 
 =item quoted-string := single-quoted-string | double-quoted-string
 
 A quoted string can use either single or double quotes.
 
-=item single-quoted-string :=
-    SINGLE ((ANY - (BREAK | BACK | SINGLE)) | BACK SINGLE | BACK BACK)* SINGLE
+=item data-section :=
+    testml-data-section |
+    yaml-data-section |
+    json-data-section |
+    xml-data-section
 
-A single quoted string has Perl semantics. A backslash is used to encode
-a backslash or a single quote character.
+The data section defines a sequence/array/list of data blocks, each of
+which is mapping/hash/dictionary consisting of an optional short label
+phrase and a set of named data points.
 
-    .foo('Won\'t you scratch\\slash my back?')
+TestML defines a default data section syntax, but this section can also
+be specified in YAML, JSON or XML.
 
-=item double-quoted-string :=
-    DOUBLE ((ANY - (BREAK | BACK | DOUBLE)) |
-    BACK DOUBLE | BACK BACK | BACK ESCAPE )* DOUBLE
-
-A double quoted string has limited backslash escaping. You can encode a
-backslash, double quote, newline or tab character.
-
-    .bar("\tline 1\n\"line\" 2\n")
-
-=item blank-line := SPACE* EOL
-
-Blank lines are useful to space things out visually.
-
-=item comment := '#' line
-
-A comment is a line that begins with a '#'. A '#' anywhere else on a
-line will not start a comment.
-
-=item terminator := ('...' EOL) | EOF
-
-A '...' line terminates the head section. The remaining content, if any,
-is considered the data section.
-
-=item data-section := testml-data-section | yaml-data-section | json-data-section | xml-data-section
-
-The data section defines a sequence of data objects, each of which
-consists of a short label phrase and a set of named data points.
-
-TestML defines a default syntax, but this section can also be specified
-in YAML, JSON or XML.
+The parsing of the data section should instantiate a Data object.
 
 =item testml-data-section := testml-data-block-marker (SPACE | EOL) rest
 
@@ -454,8 +552,8 @@ Here is an example data section in JSON:
         <output>123</output>
       </block>
       <block label="Test two">
-        "input": "xyz",
-        "output": "321"
+        <input>xyz</input>
+        <output>321</output>
       </block>
     </testml>
 
@@ -486,29 +584,33 @@ A data block in TestML syntax looks like:
     line
     data
 
-=item block-header := block-marker (SPACE block-label)? SPACE* EOL
+=item block-header := block-marker (SPACE+ label)? SPACE* EOL
 
 A block header marks the start of a new block. The first one also marks
 the start of the data section. It contains an optional label.
 
     === The next big test
 
-=item block-marker := '===' | meta.testml_block_marker
+=item block-marker := '===' | Meta.testml_block_marker
 
 A block marker is usually C<===>, but it is configurable via a meta
 statement, like this:
 
     testml_block_marker: ***
 
+=item label :=
+    (ANY - (SPACE | BREAK))
+    (NON-BREAK* (ANY - (SPACE | BREAK)))?
+
 =item data-point := lines-point | phrase-point
 
 Data points are the pieces of raw data that TestML transforms and
 compares. They come in two flavors, lines and phrases.
 
-=item lines-point := point-marker point-name SPACE* EOL line*
+=item lines-point := point-marker SPACE+ point-name SPACE* EOL (line - block-header)*
 
-A "lines" data point is a string containing zero or more lines. If it
-has one or more lines it always ends with a newline.
+A "lines" data point encodes a string containing zero or more lines. If
+it has one or more lines it always ends with a newline.
 
     --- lines
     line1
@@ -516,59 +618,44 @@ has one or more lines it always ends with a newline.
     
     line4
 
-=item phrase-point := point-marker point-name ':' SPACE NON-BREAK* EOL blank-line*
+=item phrase-point := point-marker SPACE+ point-name ':' (SPACE NON-BREAK*)? EOL blank-line*
 
-A "phrase" data point is a string with no newlines.
+A "phrase" data point encodes a string with no newlines.
 
     --- phrase: This string is one line with no newline at the end.
 
-=item point-marker := '---' | meta.testml_point_marker
+=item point-marker := '---' | Meta.testml_point_marker
 
 A point marker is usually C<--->, but it is configurable via a meta
 statement, like this:
 
     testml_point_marker: +++
 
-=item line := NON-BREAK* EOL
-
-A line is a string of zero or more non break characters followed by
-a newline.
-
 =back
 
-=head2 TestML Document Constraints
+=head1 Valid Meta Keywords
 
-The above grammars define the valid syntax for a TestML document, but
-there is a also set of constraints that all TestML documents must
-adhere to.
-
-=head3 Document Encoding
-
-All TestML documents are composed of the printable unicode character set
-and I<must> be encoded in UTF8. Any character that does not meet these
-requirements must cause an error.
-
-=head3 Valid Meta Keywords
-
-If the parser detects a meta keyword that is not listed below, it must
-cause an error.
+The following meta section keywords are supported by TestML 1.0.
 
 =over
 
 =item testml - B<required>
 
-The I<testml> meta statement is required and it must specify a version
-number. The TestML implementation can then determine whether or not it
-can process the document or not.
+The C<testml> meta statement is required, must be the first meta
+statement and must specify a valid TestML release version number.
+
+Once the version number is known by the parser, it controls how the rest
+of the document is parsed. If the parser does not support the specified
+version number, it must raise an exception.
 
 For example:
 
     testml: 1.0
 
-As a guideline, TestML will attempt to be backwards compatible with
-version numbers that have the same first number. So version 1.3 would be
-backwards compatible with 1.2, 1.1 and 1.0. Version 2.0 would probably
-break compatability.
+As a guideline, the TestML specification authors will attempt to be
+backwards compatible with version numbers that have the same first
+number. So version 1.3 would be backwards compatible with 1.2, 1.1 and
+1.0. Version 2.0 would probably break compatability.
 
 =item title - I<optional>
 
@@ -583,9 +670,35 @@ The TestML implementation is free to use this meta field as it sees fit.
 
 The I<tests> meta option specifies the expected number of tests that
 will be run by the runner. If the actual number differs the
-implementation may complain or throw an error.
+implementation may complain or raise an exception.
 
     tests: 13
+
+=item data - I<optional>
+
+The I<data> meta option can be specified zero, one or multiple times. It
+names a relative file path that should be read and parsed as a data
+section. The resulting sequences of all the data files are concatenated
+together into the Data object.
+
+By default, the inline data section comes first when other data sources are
+specified. A special file path name '_' can be used to indicate the inline
+data section.
+
+The file extension is used to determine the format of the data section encoded
+in the file.
+
+Example:
+
+    data: file1.tml
+    data: file2.xml
+    data: _
+    data: file4.yaml
+
+A file extension can be added to the inline pseudoname, like '_.xml', but this
+is usually not necessary.
+
+The data attribute of the Meta object is always stored as an array.
 
 =item testml_block_marker - I<optional>
 
