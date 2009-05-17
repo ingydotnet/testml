@@ -32,6 +32,8 @@
 	</ul>
 
 	<li><a href="#valid_meta_keywords">Valid Meta Keywords</a></li>
+	<li><a href="#testml_standard_library">TestML Standard Library</a></li>
+	<li><a href="#testml_runtime_specification">TestML Runtime Specification</a></li>
 	<li><a href="#authors">Authors</a></li>
 	<li><a href="#license">License</a></li>
 	<li><a href="#copyright">Copyright</a></li>
@@ -44,7 +46,7 @@
 <p>
 </p>
 <h1><a name="testml">TestML</a></h1>
-<p>A Software Testing Meta Language. Version 1.0.</p>
+<p>A Software Testing Meta Language. Version 1.0 Pre-release.</p>
 <p>
 </p>
 <hr />
@@ -72,7 +74,7 @@ Then assertions can be made between the altered data points and
 expected result data points. Here is a simple, but complete, TestML
 document example:</p>
 <pre>
-    testml: 1.0</pre>
+    %TestML: 1.0</pre>
 <pre>
     input.uppercase() == output;</pre>
 <pre>
@@ -85,10 +87,10 @@ document example:</p>
     --- output: I LOVE LUCY</pre>
 <p>In this case, a programmer of any given language would do the following:</p>
 <ul>
-<li><strong><a name="implement_a_library_foo_that_can_turn_strings_to_upper_case" class="item">Implement a library &quot;Foo&quot; that can turn strings to upper case.</a></strong>
+<li><strong><a name="implement_an_application_that_can_turn_strings_to_upper_case" class="item">Implement an application that can turn strings to upper case.</a></strong>
 
-<li><strong><a name="implement_a_testml_bridge_class_that_defines_the_uppercase_transform_to_invoke_the_foo_library_s_upper_casing_facility" class="item">Implement a TestML &quot;bridge class&quot; that defines the 'uppercase'
-transform to invoke the Foo library's upper casing facility.</a></strong>
+<li><strong><a name="implement_a_testml_bridge_class_that_defines_the_uppercase_transform_to_invoke_the_foo_application_s_upper_casing_facility" class="item">Implement a TestML &quot;bridge class&quot; that defines the 'uppercase'
+transform to invoke the Foo application's upper casing facility.</a></strong>
 
 <li><strong><a name="set_up_their_test_environment_to_use_testml_to_run_the_test" class="item">Set up their test environment to use TestML to run the test.</a></strong>
 
@@ -359,7 +361,7 @@ test section followed by an optional inline data section.</p>
 <dd>
 <pre>
     # Meta statements,
-    testml: 1.0</pre>
+    %TestML: 1.0</pre>
 </dd>
 <dd>
 <pre>
@@ -402,15 +404,14 @@ statement declared.</p>
 <dd>
 <p>Comments start with a '#' and go to the end of the line. Comments are
 only allowed where specifically permitted by the grammar. Comments are
-not used for any purpose in the TestML document object. In other words,
-they are thrown out.</p>
+treated like insignificant whitespace and ignored by the parser.</p>
 </dd>
 </li>
 <dt><strong><a name="line_non_break_eol" class="item">line := NON-BREAK* EOL</a></strong>
 
 <dd>
 <p>A line is a string of zero or more non break characters followed by
-a newline.</p>
+a line ending.</p>
 </dd>
 </li>
 <dt><strong><a name="blank_line_space_eol" class="item">blank-line := SPACE* EOL</a></strong>
@@ -420,7 +421,7 @@ a newline.</p>
 </dd>
 </li>
 <dt><strong><a name="version" class="item">meta-testml-statement :=
-    'testml:' SPACE+ testml-version ( SPACE+ comment | EOL )</a></strong>
+    '%TestML:' SPACE+ testml-version ( SPACE+ comment | EOL )</a></strong>
 
 <dd>
 <p>The meta <code>testml</code> statement is required, must be the first meta
@@ -433,7 +434,7 @@ statement, and must specify a valid TestML release version number.</p>
 <p>Currently the only valid version number is '1.0'.</p>
 </dd>
 </li>
-<dt><strong><a name="value" class="item">meta-statement := meta-keyword ':' SPACE+ meta-value (SPACE+ comment | EOL)</a></strong>
+<dt><strong><a name="value" class="item">meta-statement := '%' meta-keyword ':' SPACE+ meta-value (SPACE+ comment | EOL)</a></strong>
 
 <dd>
 <p>Meta statements are key/value pairs separated by a colon and a
@@ -441,17 +442,24 @@ SPACE. A given meta setting may affect the document parsing from
 that point forward.</p>
 </dd>
 </li>
-<dt><strong><a name="meta_keyword_title_tests_data_testml_block_marker_testml_point_marker_x_word" class="item">meta-keyword :=
-    ( 'title' | 'tests' | 'data' | 'testml_block_marker' | 'testml_point_marker') |
-    ( 'x_' WORD+ )</a></strong>
+<dt><strong><a name="meta_keyword_core_meta_keyword_user_meta_keyword" class="item">meta-keyword := core-meta-keyword | user-meta-keyword</a></strong>
 
 <dd>
-<p>The listed keywords represent the meta settings supported in TestML 1.0.
-See <a href="#valid_meta_keywords">Valid Meta Keywords</a> for the definitions of them.</p>
+<p>Meta settings come in two forms. TestML defined core settings, and user
+defined settings.</p>
 </dd>
+</li>
+<dt><strong><a name="core_meta_keyword_title_tests_data_testmlblockmarker_testmlpointmarker" class="item">core-meta-keyword :=
+    ( 'Title'
+    | 'Tests'
+    | 'Data'
+    | 'TestMLBlockMarker'
+    | 'TestMLPointMarker'
+    )</a></strong>
+
 <dd>
-<p>A document also allows for user defined meta keywords that begin
-with 'x_'.</p>
+<p>The listed keywords represent the core meta settings supported in TestML
+1.0. See <a href="#valid_meta_keywords">Valid Meta Keywords</a> for the definitions of them.</p>
 </dd>
 </li>
 <dt><strong><a name="meta_value_single_quoted_string_double_quoted_string_unquoted_string_space_comment_eol" class="item">meta-value := (
@@ -817,7 +825,7 @@ the start of the data section. It contains an optional label.</p>
     === The next big test</pre>
 </dd>
 </li>
-<dt><strong><a name="block_marker_meta_testml_block_marker" class="item">block-marker := '===' | Meta.testml_block_marker</a></strong>
+<dt><strong><a name="block_marker_meta_testmlblockmarker" class="item">block-marker := '===' | Meta.TestMLBlockMarker</a></strong>
 
 <dd>
 <p>A block marker is usually <code>===</code>, but it is configurable via a meta
@@ -825,13 +833,18 @@ statement, like this:</p>
 </dd>
 <dd>
 <pre>
-    testml_block_marker: ***</pre>
+    TestMLBlockMarker: ***</pre>
 </dd>
 </li>
 <dt><strong><a name="label_any_space_break_non_break_any_space_break" class="item">label :=
     (ANY - (SPACE | BREAK))
     (NON-BREAK* (ANY - (SPACE | BREAK)))?</a></strong>
 
+<dd>
+<p>A label is a short description of the block. It can be used to label
+tests at runtime.</p>
+</dd>
+</li>
 <dt><strong><a name="data_point_lines_point_phrase_point" class="item">data-point := lines-point | phrase-point</a></strong>
 
 <dd>
@@ -864,7 +877,7 @@ it has one or more lines it always ends with a newline.</p>
     --- phrase: This string is one line with no newline at the end.</pre>
 </dd>
 </li>
-<dt><strong><a name="point_marker_meta_testml_point_marker" class="item">point-marker := '---' | Meta.testml_point_marker</a></strong>
+<dt><strong><a name="point_marker_meta_testmlpointmarker" class="item">point-marker := '---' | Meta.TestMLPointMarker</a></strong>
 
 <dd>
 <p>A point marker is usually <code>---</code>, but it is configurable via a meta
@@ -872,7 +885,7 @@ statement, like this:</p>
 </dd>
 <dd>
 <pre>
-    testml_point_marker: +++</pre>
+    %TestMLPointMarker: +++</pre>
 </dd>
 </li>
 </dl>
@@ -882,10 +895,10 @@ statement, like this:</p>
 <h1><a name="valid_meta_keywords">Valid Meta Keywords</a></h1>
 <p>The following meta section keywords are supported by TestML 1.0.</p>
 <dl>
-<dt><strong><a name="testml_required" class="item">testml - <strong>required</strong></a></strong>
+<dt><strong><a name="testml_required" class="item">TestML - <strong>required</strong></a></strong>
 
 <dd>
-<p>The <code>testml</code> meta statement is required, must be the first meta
+<p>The <code>TestML</code> meta statement is required, must be the first meta
 statement and must specify a valid TestML release version number.</p>
 </dd>
 <dd>
@@ -898,7 +911,7 @@ version number, it must raise an exception.</p>
 </dd>
 <dd>
 <pre>
-    testml: 1.0</pre>
+    %TestML: 1.0</pre>
 </dd>
 <dd>
 <p>As a guideline, the TestML specification authors will attempt to be
@@ -907,36 +920,36 @@ number. So version 1.3 would be backwards compatible with 1.2, 1.1 and
 1.0. Version 2.0 would probably break compatability.</p>
 </dd>
 </li>
-<dt><strong><a name="title_optional" class="item">title - <em>optional</em></a></strong>
+<dt><strong><a name="title_optional" class="item">Title - <em>optional</em></a></strong>
 
 <dd>
-<p>The <em>title</em> meta option specifies a short title phrase to describe the
+<p>The <em>Title</em> meta option specifies a short title phrase to describe the
 entire TestML document.</p>
 </dd>
 <dd>
 <pre>
-    title: These are a few of my Favorite Tests!</pre>
+    %Title: These are a few of my Favorite Tests!</pre>
 </dd>
 <dd>
 <p>The TestML implementation is free to use this meta field as it sees fit.</p>
 </dd>
 </li>
-<dt><strong><a name="tests_optional" class="item">tests - <em>optional</em></a></strong>
+<dt><strong><a name="tests_optional" class="item">Tests - <em>optional</em></a></strong>
 
 <dd>
-<p>The <em>tests</em> meta option specifies the expected number of tests that
+<p>The <em>Tests</em> meta option specifies the expected number of tests that
 will be run by the runner. If the actual number differs the
 implementation may complain or raise an exception.</p>
 </dd>
 <dd>
 <pre>
-    tests: 13</pre>
+    %Tests: 13</pre>
 </dd>
 </li>
-<dt><strong><a name="data_optional" class="item">data - <em>optional</em></a></strong>
+<dt><strong><a name="data_optional" class="item">Data - <em>optional</em></a></strong>
 
 <dd>
-<p>The <em>data</em> meta option can be specified zero, one or multiple times. It
+<p>The <em>Data</em> meta option can be specified zero, one or multiple times. It
 names a relative file path that should be read and parsed as a data
 section. The resulting sequences of all the data files are concatenated
 together into the Data object.</p>
@@ -955,20 +968,16 @@ in the file.</p>
 </dd>
 <dd>
 <pre>
-    data: file1.tml
-    data: file2.xml
-    data: _
-    data: file4.yaml</pre>
+    %Data: file1.tml
+    %Data: file2.xml
+    %Data: _
+    %Data: file4.yaml</pre>
 </dd>
 <dd>
-<p>A file extension can be added to the inline pseudoname, like '_.xml', but this
-is usually not necessary.</p>
-</dd>
-<dd>
-<p>The data attribute of the Meta object is always stored as an array.</p>
+<p>The Data attribute of the Meta object is always stored as an array.</p>
 </dd>
 </li>
-<dt><strong><a name="testml_block_marker_optional" class="item">testml_block_marker - <em>optional</em></a></strong>
+<dt><strong><a name="testmlblockmarker_optional" class="item">TestMLBlockMarker - <em>optional</em></a></strong>
 
 <dd>
 <p>If you choose to use the TestML data markup to encode your data section,
@@ -982,21 +991,41 @@ the specified pattern to indicate the start of the data section.</p>
 </dd>
 <dd>
 <pre>
-    testml_block_marker: *=*</pre>
+    %TestMLBlockMarker: *=*</pre>
 </dd>
 </li>
-<dt><strong><a name="testml_point_marker_optional" class="item">testml_point_marker - <em>optional</em></a></strong>
+<dt><strong><a name="testmlpointmarker_optional" class="item">TestMLPointMarker - <em>optional</em></a></strong>
 
 <dd>
-<p>This option is the same as the testml_block_marker option above, except
+<p>This option is the same as the TestMLBlockMarker option above, except
 it is for the data point marker.</p>
 </dd>
 <dd>
 <pre>
-    testml_point_marker: +++</pre>
+    %TestMLPointMarker: +++</pre>
 </dd>
 </li>
 </dl>
+<p>
+</p>
+<hr />
+<h1><a name="testml_standard_library">TestML Standard Library</a></h1>
+<p>TestML defines a standard library specification. The standard library
+must be implemented and available in every TestML implementation. The
+library specification has a version number that is kept in sync with
+this specification's version number.</p>
+<p>The Standard Library Specification is defined in a separate document. The
+latest version is available at <a href="http://testml.org/spec/stdlib/">http://testml.org/spec/stdlib/</a>.</p>
+<p>
+</p>
+<hr />
+<h1><a name="testml_runtime_specification">TestML Runtime Specification</a></h1>
+<p>In order to develop a TestML implementation, one must correctly implement the
+runtime processing. TestML defines a runtime specification. The runtime
+specification has a version number that is kept in sync with this
+specification's version number.</p>
+<p>The TestML Runtime Specification is defined in a separate document. The
+latest version is available at <a href="http://testml.org/spec/runtime/">http://testml.org/spec/runtime/</a>.</p>
 <p>
 </p>
 <hr />
@@ -1009,6 +1038,8 @@ it is for the data point marker.</p>
 <li><strong><a name="chris_dent" class="item">Chris Dent</a></strong>
 
 <li><strong><a name="yuval_kogman" class="item">Yuval Kogman</a></strong>
+
+<li><strong><a name="adam_kennedy" class="item">Adam Kennedy</a></strong>
 
 </ul>
 <p>
