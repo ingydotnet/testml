@@ -7,8 +7,18 @@ Welcome to <b>TestML</b>. TestML is a generic testing meta language that is
 used to write data driven unit tests for software in any programming language. 
 </p>
 
+<h2>The 1.0 Specifications</h2>
 <ul>
 <li><a href="spec/">The TestML 1.0 Specification</a></li>
-<li><a href="doc/manual">The TestML 1.0 Manual</a></li>
+<li><a href="spec/stdlib/">The TestML Standard Library 1.0.0 Specification</a></li>
+<li><a href="spec/runtime/">The TestML Runtime 1.0.0 Specification</a></li>
 </ul>
+<p>
+<b>NOTE:</b>
+<i>
+TestML 1.0 is in a pre-release stage. These specifications are currently
+changing rapidly.
+</i>
+</p>
+<!-- <li><a href="doc/manual">The TestML 1.0 Manual</a></li> -->
 [% END %]

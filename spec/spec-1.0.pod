@@ -1,6 +1,6 @@
 =head1 TestML
 
-A Software Testing Meta Language. Version 1.0.
+A Software Testing Meta Language. Version 1.0 Pre-release.
 
 =head1 Status
 
@@ -29,7 +29,7 @@ Then assertions can be made between the altered data points and
 expected result data points. Here is a simple, but complete, TestML
 document example:
 
-    testml: 1.0
+    %TestML: 1.0
 
     input.uppercase() == output;
 
@@ -45,10 +45,10 @@ In this case, a programmer of any given language would do the following:
 
 =over
 
-=item * Implement a library "Foo" that can turn strings to upper case.
+=item * Implement an application that can turn strings to upper case.
 
 =item * Implement a TestML "bridge class" that defines the 'uppercase'
-transform to invoke the Foo library's upper casing facility.
+transform to invoke the Foo application's upper casing facility.
 
 =item * Set up their test environment to use TestML to run the test.
 
@@ -287,7 +287,7 @@ Here is an example document:
     # TestML document includes:
 
     # Meta statements,
-    testml: 1.0
+    %TestML: 1.0
 
     # And test statements.
     foo.upper() == bar;
@@ -319,20 +319,19 @@ The parsing of the meta section should instantiate a Meta object.
 
 Comments start with a '#' and go to the end of the line. Comments are
 only allowed where specifically permitted by the grammar. Comments are
-not used for any purpose in the TestML document object. In other words,
-they are thrown out.
+treated like insignificant whitespace and ignored by the parser.
 
 =item line := NON-BREAK* EOL
 
 A line is a string of zero or more non break characters followed by
-a newline.
+a line ending.
 
 =item blank-line := SPACE* EOL
 
 Blank lines are useful to space things out visually.
 
 =item meta-testml-statement :=
-    'testml:' SPACE+ testml-version ( SPACE+ comment | EOL )
+    '%TestML:' SPACE+ testml-version ( SPACE+ comment | EOL )
 
 The meta C<testml> statement is required, must be the first meta
 statement, and must specify a valid TestML release version number.
@@ -341,21 +340,27 @@ statement, and must specify a valid TestML release version number.
 
 Currently the only valid version number is '1.0'.
 
-=item meta-statement := meta-keyword ':' SPACE+ meta-value (SPACE+ comment | EOL)
+=item meta-statement := '%' meta-keyword ':' SPACE+ meta-value (SPACE+ comment | EOL)
 
 Meta statements are key/value pairs separated by a colon and a
 SPACE. A given meta setting may affect the document parsing from
 that point forward.
 
-=item meta-keyword :=
-    ( 'title' | 'tests' | 'data' | 'testml_block_marker' | 'testml_point_marker') |
-    ( 'x_' WORD+ )
+=item meta-keyword := core-meta-keyword | user-meta-keyword
 
-The listed keywords represent the meta settings supported in TestML 1.0.
-See L<Valid Meta Keywords> for the definitions of them.
+Meta settings come in two forms. TestML defined core settings, and user
+defined settings.
 
-A document also allows for user defined meta keywords that begin
-with 'x_'.
+=item core-meta-keyword :=
+    ( 'Title'
+    | 'Tests'
+    | 'Data'
+    | 'TestMLBlockMarker'
+    | 'TestMLPointMarker'
+    )
+
+The listed keywords represent the core meta settings supported in TestML
+1.0. See L<Valid Meta Keywords> for the definitions of them.
 
 =item meta-value := (
     single-quoted-string |
@@ -625,16 +630,19 @@ the start of the data section. It contains an optional label.
 
     === The next big test
 
-=item block-marker := '===' | Meta.testml_block_marker
+=item block-marker := '===' | Meta.TestMLBlockMarker
 
 A block marker is usually C<===>, but it is configurable via a meta
 statement, like this:
 
-    testml_block_marker: ***
+    TestMLBlockMarker: ***
 
 =item label :=
     (ANY - (SPACE | BREAK))
     (NON-BREAK* (ANY - (SPACE | BREAK)))?
+
+A label is a short description of the block. It can be used to label
+tests at runtime.
 
 =item data-point := lines-point | phrase-point
 
@@ -658,12 +666,12 @@ A "phrase" data point encodes a string with no newlines.
 
     --- phrase: This string is one line with no newline at the end.
 
-=item point-marker := '---' | Meta.testml_point_marker
+=item point-marker := '---' | Meta.TestMLPointMarker
 
 A point marker is usually C<--->, but it is configurable via a meta
 statement, like this:
 
-    testml_point_marker: +++
+    %TestMLPointMarker: +++
 
 =back
 
@@ -673,9 +681,9 @@ The following meta section keywords are supported by TestML 1.0.
 
 =over
 
-=item testml - B<required>
+=item TestML - B<required>
 
-The C<testml> meta statement is required, must be the first meta
+The C<TestML> meta statement is required, must be the first meta
 statement and must specify a valid TestML release version number.
 
 Once the version number is known by the parser, it controls how the rest
@@ -684,33 +692,33 @@ version number, it must raise an exception.
 
 For example:
 
-    testml: 1.0
+    %TestML: 1.0
 
 As a guideline, the TestML specification authors will attempt to be
 backwards compatible with version numbers that have the same first
 number. So version 1.3 would be backwards compatible with 1.2, 1.1 and
 1.0. Version 2.0 would probably break compatability.
 
-=item title - I<optional>
+=item Title - I<optional>
 
-The I<title> meta option specifies a short title phrase to describe the
+The I<Title> meta option specifies a short title phrase to describe the
 entire TestML document.
 
-    title: These are a few of my Favorite Tests!
+    %Title: These are a few of my Favorite Tests!
 
 The TestML implementation is free to use this meta field as it sees fit.
 
-=item tests - I<optional>
+=item Tests - I<optional>
 
-The I<tests> meta option specifies the expected number of tests that
+The I<Tests> meta option specifies the expected number of tests that
 will be run by the runner. If the actual number differs the
 implementation may complain or raise an exception.
 
-    tests: 13
+    %Tests: 13
 
-=item data - I<optional>
+=item Data - I<optional>
 
-The I<data> meta option can be specified zero, one or multiple times. It
+The I<Data> meta option can be specified zero, one or multiple times. It
 names a relative file path that should be read and parsed as a data
 section. The resulting sequences of all the data files are concatenated
 together into the Data object.
@@ -724,17 +732,14 @@ in the file.
 
 Example:
 
-    data: file1.tml
-    data: file2.xml
-    data: _
-    data: file4.yaml
+    %Data: file1.tml
+    %Data: file2.xml
+    %Data: _
+    %Data: file4.yaml
 
-A file extension can be added to the inline pseudoname, like '_.xml', but this
-is usually not necessary.
+The Data attribute of the Meta object is always stored as an array.
 
-The data attribute of the Meta object is always stored as an array.
-
-=item testml_block_marker - I<optional>
+=item TestMLBlockMarker - I<optional>
 
 If you choose to use the TestML data markup to encode your data section,
 you can choose the character sequence to replace the default ('===').
@@ -744,16 +749,36 @@ a line in your data.
 Setting this option causes the parser to immediately start looking for
 the specified pattern to indicate the start of the data section.
 
-    testml_block_marker: *=*
+    %TestMLBlockMarker: *=*
 
-=item testml_point_marker - I<optional>
+=item TestMLPointMarker - I<optional>
 
-This option is the same as the testml_block_marker option above, except
+This option is the same as the TestMLBlockMarker option above, except
 it is for the data point marker.
 
-    testml_point_marker: +++
+    %TestMLPointMarker: +++
 
 =back
+
+=head1 TestML Standard Library
+
+TestML defines a standard library specification. The standard library
+must be implemented and available in every TestML implementation. The
+library specification has a version number that is kept in sync with
+this specification's version number.
+
+The Standard Library Specification is defined in a separate document. The
+latest version is available at L<http://testml.org/spec/stdlib/>.
+
+=head1 TestML Runtime Specification
+
+In order to develop a TestML implementation, one must correctly implement the
+runtime processing. TestML defines a runtime specification. The runtime
+specification has a version number that is kept in sync with this
+specification's version number.
+
+The TestML Runtime Specification is defined in a separate document. The
+latest version is available at L<http://testml.org/spec/runtime/>.
 
 =head1 Authors
 
@@ -768,6 +793,8 @@ The spec was reviewed and/or contributed to by the following people:
 =item * Chris Dent
 
 =item * Yuval Kogman
+
+=item * Adam Kennedy
 
 =back
 

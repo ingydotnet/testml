@@ -1,7 +1,7 @@
 .PHONY: spec clean open gh-clean
 
 TOP = $(shell pwd)
-ALL = spec doc/manual
+ALL = spec spec/stdlib spec/runtime doc/manual
 
 all: index.html
 	for d in $(ALL); do TOP=$(TOP) make -C $$d; done
