@@ -362,9 +362,6 @@ defined settings.
 The listed keywords represent the core meta settings supported in TestML
 1.0. See L<Valid Meta Keywords> for the definitions of them.
 
-A document also allows for user defined meta keywords that begin
-with 'x_'.
-
 =item meta-value := (
     single-quoted-string |
     double-quoted-string |
@@ -643,6 +640,9 @@ statement, like this:
 =item label :=
     (ANY - (SPACE | BREAK))
     (NON-BREAK* (ANY - (SPACE | BREAK)))?
+
+A label is a short description of the block. It can be used to label
+tests at runtime.
 
 =item data-point := lines-point | phrase-point
 
