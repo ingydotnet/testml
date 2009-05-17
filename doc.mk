@@ -4,7 +4,7 @@ POD = $(shell ls *.pod)
 
 all: index.html
 
-index.html: index.html.tt2
+index.html: index.html.tt2 config.yaml
 	tt-render --path=.:$(TOP)/template --data=config.yaml $< > $@
 
 index.html.tt2: $(POD)
@@ -13,11 +13,14 @@ index.html.tt2: $(POD)
 	$(TOP)/bin/strip.pl $@.tmp > $@
 	rm $@.tmp
 
+config.yaml:
+	echo 'top: $(TOP)' > $@
+
 open: index.html
 	$@ $<
 
 clean:
-	rm -f index.html*
+	rm -f index.html* config.yaml
 
 gh-clean:
 	rm -f index.html.tt2
