@@ -1,12 +1,17 @@
-.PHONY: spec clean open gh-clean
+.PHONY: spec clean open gh-clean force
 
-ALL = spec spec/stdlib spec/runtime doc/manual
+ALL = $(shell find . -name *.pod | perl -pe 's/^(.*\/).*$$/$$1/' | sort | uniq)
 
-all: index.html
-	for d in $(ALL); do make -C $$d; done
+all: index.html $(ALL)
 
 index.html: index.html.tt2
 	tt-render --path=.:template --data=config.yaml $< > $@
+
+$(ALL): force
+	make -C $@
+
+force:
+	true
 
 clean:
 	rm -f index.html
