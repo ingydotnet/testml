@@ -1,1 +1,2 @@
-../doc.mk
+TOP = ..
+include $(TOP)/doc.mk

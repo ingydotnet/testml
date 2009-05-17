@@ -1,10 +1,9 @@
 .PHONY: spec clean open gh-clean
 
-TOP = $(shell pwd)
 ALL = spec spec/stdlib spec/runtime doc/manual
 
 all: index.html
-	for d in $(ALL); do TOP=$(TOP) make -C $$d; done
+	for d in $(ALL); do make -C $$d; done
 
 index.html: index.html.tt2
 	tt-render --path=.:template --data=config.yaml $< > $@
