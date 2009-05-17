@@ -1,12 +1,15 @@
 =head1 TestML
 
-A Software Testing Meta Language. Version 1.0 Pre-release.
+A Software Testing Meta Language
 
 =head1 Status
 
-Working Draft - 16 May, 2009
+Working Draft - 17 May, 2009
 
-This document is not the final 1.0 release. It is very new, under
+This document is the TestML Language Specification. Version 1.0
+Pre-release.
+
+This is not the final 1.0 release. It is very new, under
 review, under revision and undergoing initial implementation and
 testing.
 
