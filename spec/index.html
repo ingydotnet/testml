@@ -46,13 +46,15 @@
 <p>
 </p>
 <h1><a name="testml">TestML</a></h1>
-<p>A Software Testing Meta Language. Version 1.0 Pre-release.</p>
+<p>A Software Testing Meta Language</p>
 <p>
 </p>
 <hr />
 <h1><a name="status">Status</a></h1>
-<p>Working Draft - 16 May, 2009</p>
-<p>This document is not the final 1.0 release. It is very new, under
+<p>Working Draft - 19 May, 2009</p>
+<p>This document is the TestML Language Specification. Version 1.0
+Pre-release.</p>
+<p>This is not the final 1.0 release. It is very new, under
 review, under revision and undergoing initial implementation and
 testing.</p>
 <p>
@@ -449,10 +451,10 @@ that point forward.</p>
 defined settings.</p>
 </dd>
 </li>
-<dt><strong><a name="core_meta_keyword_title_tests_data_testmlblockmarker_testmlpointmarker" class="item">core-meta-keyword :=
+<dt><strong><a name="core_meta_keyword_title_data_plan_testmlblockmarker_testmlpointmarker" class="item">core-meta-keyword :=
     ( 'Title'
-    | 'Tests'
     | 'Data'
+    | 'Plan'
     | 'TestMLBlockMarker'
     | 'TestMLPointMarker'
     )</a></strong>
@@ -462,11 +464,18 @@ defined settings.</p>
 1.0. See <a href="#valid_meta_keywords">Valid Meta Keywords</a> for the definitions of them.</p>
 </dd>
 </li>
-<dt><strong><a name="meta_value_single_quoted_string_double_quoted_string_unquoted_string_space_comment_eol" class="item">meta-value := (
+<dt><strong><a name="user_meta_keyword_lower_word" class="item">user-meta-keyword := LOWER WORD*</a></strong>
+
+<dd>
+<p>A user can make up their own meta settings, as long as they begin with a
+lower case letter. These values are then available to the runtime code.</p>
+</dd>
+</li>
+<dt><strong><a name="meta_value_single_quoted_string_double_quoted_string_unquoted_string" class="item">meta-value := (
     single-quoted-string |
     double-quoted-string |
     unquoted-string
-) (SPACE+ comment | EOL)</a></strong>
+)</a></strong>
 
 <dd>
 <p>A meta value is the value of the meta setting being defined. Some settings
@@ -523,13 +532,24 @@ testing program.</p>
 <p>The parsing of the meta section should instantiate a Test object.</p>
 </dd>
 </li>
-<dt><strong><a name="test_statement_data_expression_test_assertion" class="item">test-statement := ( data-expression | test-assertion ) ';'</a></strong>
+<dt><strong><a name="test_statement_test_assertion_data_expression" class="item">test-statement := ( test-assertion | data-expression ) ';'</a></strong>
 
 <dd>
 <p>A test statement is a processing directive for running tests. A
 statement can either be a single data expression, which causes code to
 run but doesn't execute tests, or it can be an assertion which runs a
 test operation by comparing the results of two data expressions.</p>
+</dd>
+</li>
+<dt><strong><a name="test_assertion_data_expression_assertion_expression" class="item">test-assertion := data-expression assertion-expression</a></strong>
+
+<dd>
+<p>A test assertion is a declaration of a testing operation. A typical
+assertion looks like:</p>
+</dd>
+<dd>
+<pre>
+    input-point.transform1().transform2(arguments) == expected-output-point</pre>
 </dd>
 </li>
 <dt><strong><a name="expression" class="item">data-expression := data-sub-expression ( call-indicator data-subexpression )*</a></strong>
@@ -539,7 +559,7 @@ test operation by comparing the results of two data expressions.</p>
 evaluated in order, passing the result of each to the next one.</p>
 </dd>
 </li>
-<dt><strong><a name="call_indicator_dot_ws_ws_dot" class="item">call-indicator := (DOT ws*) | (ws* DOT)</a></strong>
+<dt><strong><a name="call_indicator_dot_ws_ws_dot" class="item">call-indicator := (DOT ws* | ws* DOT)</a></strong>
 
 <dd>
 <p>A call indicator is a period between two sub expressions. The period
@@ -627,17 +647,6 @@ bridge class.</p>
 <p>A quoted string can use either single or double quotes.</p>
 </dd>
 </li>
-<dt><strong><a name="test_assertion_data_expression_assertion_expression" class="item">test-assertion := data-expression assertion-expression</a></strong>
-
-<dd>
-<p>A test assertion is a declaration of a testing operation. A typical
-assertion looks like:</p>
-</dd>
-<dd>
-<pre>
-    input-point.transform1().transform2(arguments) == expected-output-point</pre>
-</dd>
-</li>
 <dt><strong><a name="assertion_expression_inline_assertion_function_assertion" class="item">assertion-expression := inline-assertion | function-assertion</a></strong>
 
 <dd>
@@ -655,7 +664,7 @@ assertion looks like:</p>
     foo.EQ(bar)</pre>
 </dd>
 </li>
-<dt><strong><a name="inline_assertion_expression_ws_assertion_operator_ws_data_expression" class="item">inline-assertion-expression := ws+ assertion-operator ws+ data-expression</a></strong>
+<dt><strong><a name="inline_assertion_ws_assertion_operator_ws_data_expression" class="item">inline-assertion := ws+ assertion-operator ws+ data-expression</a></strong>
 
 <dd>
 <p>An assertion expression is an operator followed by a data expression
@@ -934,18 +943,6 @@ entire TestML document.</p>
 <p>The TestML implementation is free to use this meta field as it sees fit.</p>
 </dd>
 </li>
-<dt><strong><a name="tests_optional" class="item">Tests - <em>optional</em></a></strong>
-
-<dd>
-<p>The <em>Tests</em> meta option specifies the expected number of tests that
-will be run by the runner. If the actual number differs the
-implementation may complain or raise an exception.</p>
-</dd>
-<dd>
-<pre>
-    %Tests: 13</pre>
-</dd>
-</li>
 <dt><strong><a name="data_optional" class="item">Data - <em>optional</em></a></strong>
 
 <dd>
@@ -960,8 +957,8 @@ specified. A special file path name '_' can be used to indicate the inline
 data section.</p>
 </dd>
 <dd>
-<p>The file extension is used to determine the format of the data section encoded
-in the file.</p>
+<p>The file extension is used to determine the format of the data section
+encoded in the file.</p>
 </dd>
 <dd>
 <p>Example:</p>
@@ -975,6 +972,18 @@ in the file.</p>
 </dd>
 <dd>
 <p>The Data attribute of the Meta object is always stored as an array.</p>
+</dd>
+</li>
+<dt><strong><a name="plan_optional" class="item">Plan - <em>optional</em></a></strong>
+
+<dd>
+<p>The <em>Plan</em> meta option specifies the expected number of tests that will
+be run by the runner. If the actual number differs the implementation
+should complain or raise an exception.</p>
+</dd>
+<dd>
+<pre>
+    %Plan: 13</pre>
 </dd>
 </li>
 <dt><strong><a name="testmlblockmarker_optional" class="item">TestMLBlockMarker - <em>optional</em></a></strong>
