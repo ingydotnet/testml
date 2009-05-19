@@ -4,7 +4,7 @@ A Software Testing Meta Language
 
 =head1 Status
 
-Working Draft - 17 May, 2009
+Working Draft - 19 May, 2009
 
 This document is the TestML Language Specification. Version 1.0
 Pre-release.
@@ -356,8 +356,8 @@ defined settings.
 
 =item core-meta-keyword :=
     ( 'Title'
-    | 'Tests'
     | 'Data'
+    | 'Plan'
     | 'TestMLBlockMarker'
     | 'TestMLPointMarker'
     )
@@ -365,11 +365,16 @@ defined settings.
 The listed keywords represent the core meta settings supported in TestML
 1.0. See L<Valid Meta Keywords> for the definitions of them.
 
+=item user-meta-keyword := LOWER WORD*
+
+A user can make up their own meta settings, as long as they begin with a
+lower case letter. These values are then available to the runtime code.
+
 =item meta-value := (
     single-quoted-string |
     double-quoted-string |
     unquoted-string
-) (SPACE+ comment | EOL)
+)
 
 A meta value is the value of the meta setting being defined. Some settings
 like C<data> are stored as arrays. Multiple statements with they same keyword
@@ -411,19 +416,26 @@ testing program.
 
 The parsing of the meta section should instantiate a Test object.
 
-=item test-statement := ( data-expression | test-assertion ) ';'
+=item test-statement := ( test-assertion | data-expression ) ';'
 
 A test statement is a processing directive for running tests. A
 statement can either be a single data expression, which causes code to
 run but doesn't execute tests, or it can be an assertion which runs a
 test operation by comparing the results of two data expressions.
 
+=item test-assertion := data-expression assertion-expression
+
+A test assertion is a declaration of a testing operation. A typical
+assertion looks like:
+
+    input-point.transform1().transform2(arguments) == expected-output-point
+
 =item data-expression := data-sub-expression ( call-indicator data-subexpression )*
 
 A data expression is a series of one or more subexpressions which are
 evaluated in order, passing the result of each to the next one.
 
-=item call-indicator := (DOT ws*) | (ws* DOT)
+=item call-indicator := (DOT ws* | ws* DOT)
 
 A call indicator is a period between two sub expressions. The period
 must be adjecent to one of the sub expressions.
@@ -485,13 +497,6 @@ An argument can either be a data expression or a quoted string.
 
 A quoted string can use either single or double quotes.
 
-=item test-assertion := data-expression assertion-expression
-
-A test assertion is a declaration of a testing operation. A typical
-assertion looks like:
-
-    input-point.transform1().transform2(arguments) == expected-output-point
-
 =item assertion-expression := inline-assertion | function-assertion
 
 An assertion expression can either be an inline operator expression:
@@ -502,7 +507,7 @@ or a function call:
 
     foo.EQ(bar)
 
-=item inline-assertion-expression := ws+ assertion-operator ws+ data-expression
+=item inline-assertion := ws+ assertion-operator ws+ data-expression
 
 An assertion expression is an operator followed by a data expression
 that represents the expected value. The operator must have some
@@ -711,14 +716,6 @@ entire TestML document.
 
 The TestML implementation is free to use this meta field as it sees fit.
 
-=item Tests - I<optional>
-
-The I<Tests> meta option specifies the expected number of tests that
-will be run by the runner. If the actual number differs the
-implementation may complain or raise an exception.
-
-    %Tests: 13
-
 =item Data - I<optional>
 
 The I<Data> meta option can be specified zero, one or multiple times. It
@@ -730,8 +727,8 @@ By default, the inline data section comes first when other data sources are
 specified. A special file path name '_' can be used to indicate the inline
 data section.
 
-The file extension is used to determine the format of the data section encoded
-in the file.
+The file extension is used to determine the format of the data section
+encoded in the file.
 
 Example:
 
@@ -741,6 +738,14 @@ Example:
     %Data: file4.yaml
 
 The Data attribute of the Meta object is always stored as an array.
+
+=item Plan - I<optional>
+
+The I<Plan> meta option specifies the expected number of tests that will
+be run by the runner. If the actual number differs the implementation
+should complain or raise an exception.
+
+    %Plan: 13
 
 =item TestMLBlockMarker - I<optional>
 
