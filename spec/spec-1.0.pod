@@ -307,6 +307,8 @@ Here is an example document:
     --- bar
     LK P
 
+=head3 Meta Section of the Grammar
+
 =item meta-section :=
     ( comment | blank-line )*
     meta-testml-statement
@@ -406,6 +408,8 @@ characters 't', 'n' or '0' respectively.
 
 AN unquoted string is the first to last non-space characters on a line
 before an optional comment.
+
+=head3 Test Section of the Grammar
 
 =item test-section := ( test-statement | ws )*
 
@@ -532,6 +536,8 @@ An assertion name is the name of an assertion function defined by the
 standard library. For this reason it begins with an upper case letter.
 
 The only defined assertion name currently is 'EQ'.
+
+=head3 Data Section of the Grammar
 
 =item data-section :=
     testml-data-section |
