@@ -407,89 +407,88 @@ characters 't', 'n' or '0' respectively.
 AN unquoted string is the first to last non-space characters on a line
 before an optional comment.
 
-=item test-section := ( test-statement | ws )* (comment | EOL)
+=item test-section := ( test-statement | ws )*
 
 The test section contains a small program written in the TestML
 programming language. This language is used to describe data
 transforms and the assertions that should hold. In other words, the
 testing program.
 
-The parsing of the meta section should instantiate a Test object.
-
-=item test-statement := ( test-assertion | data-expression ) ';'
-
-A test statement is a processing directive for running tests. A
-statement can either be a single data expression, which causes code to
-run but doesn't execute tests, or it can be an assertion which runs a
-test operation by comparing the results of two data expressions.
-
-=item test-assertion := data-expression assertion-expression
-
-A test assertion is a declaration of a testing operation. A typical
-assertion looks like:
-
-    input-point.transform1().transform2(arguments) == expected-output-point
-
-=item data-expression := data-sub-expression ( call-indicator data-subexpression )*
-
-A data expression is a series of one or more subexpressions which are
-evaluated in order, passing the result of each to the next one.
-
-=item call-indicator := (DOT ws* | ws* DOT)
-
-A call indicator is a period between two sub expressions. The period
-must be adjecent to one of the sub expressions.
-
-=item data-sub-expression := point-name | transform-call
-
-A sub expression can either be a plain point name or a transform
-function call.
-
-=item point-name := user-point-name | core-point-name
-
-A data point name is either a user defined data point, or a core global
-data point.
-
-=item user-point-name := LOWER WORD*
-
-A user data point name begins with a lower case letter. It refers to an
-element of the current data block.
-
-=item core-point-name := UPPER WORD*
-
-A core data point name begins with an upper case letter. It refers to an
-element of the standard library global data block. It contains things like
-True, False, Null and PI.
-
-=item transform-call := transform-name '(' ws* argument-list ws* ')'
-
-A transform call consists of a transform name followed by parenthesized
-arguments.
+The parsing of the meta section should instantiate a Test object. The
+Test object will contain an abstract syntax tree that the TestML runtime
+can execute.
 
 =item ws := SPACE | EOL | comment
 
 The C<ws> token represents characters in the stream that can be
 thrown away.
 
-=item transform-name := user-transform-name | core-transform-name
+=item test-statement := test-expression ';'
+
+A test statement is a processing directive for running tests. A
+statement can either be a single data expression, which causes code to
+run but doesn't execute tests, or it can be an assertion which runs a
+test operation by comparing the results of two data expressions.
+
+=item test-expression := sub-expression assertion-expression?
+
+A test expression is a series of one or more sub expressions which are
+evaluated in order, passing the result of each to the next one. It can
+have an optional assertion expression at the end which compares the
+final value to that of another sub expression.
+
+=item sub-expression :=
+    (transform-call | data-point) (call-indicator transform-call)*
+
+A sub expression can either start with a plain point name or a transform
+function call. Then it is proceeded by a chain of any number of
+transform calls.
+
+=item transform-call := transform-name '(' ws* argument-list ws* ')'
+
+A transform call consists of a transform name followed by parenthesized
+arguments.
+
+=item transform-name := user-transform | core-transform
 
 A transform is either a standard core one, or a user defined transform.
 
-=item user-transform-name := LOWER WORD*
+=item user-transform := LOWER WORD*
 
-A user data transform name is an identifier that begins with a lower case
-letter. These transforms are defined by the implementor in the
+A user data transform name is an identifier that begins with a lower
+case letter. These transforms are defined by the implementor in the
 bridge class.
 
-=item core-transform-name := UPPER WORD*
+=item core-transform := UPPER WORD*
 
 A core data transform is defined in the TestML Standard Library.
+
+=item call-indicator := (DOT ws* | ws* DOT)
+
+A call indicator is a period between two sub expressions. The period
+must be adjecent to one of the sub expressions.
+
+=item data-point := user-point | core-point
+
+A data point is either a user defined data point, or a core global
+data point.
+
+=item user-point := LOWER WORD*
+
+A user data point name begins with a lower case letter. It refers to an
+element of the current data block.
+
+=item core-point := UPPER WORD*
+
+A core data point name begins with an upper case letter. It refers to an
+element of the standard library global data block. It contains things like
+True, False, Null and PI.
 
 =item argument-list := ( argument ( ws* ',' ws* argument )* )?
 
 An argument is zero or more arguments.
 
-=item argument := data-expression | quoted-string
+=item argument := sub-expression | quoted-string
 
 An argument can either be a data expression or a quoted string.
 
@@ -497,7 +496,12 @@ An argument can either be a data expression or a quoted string.
 
 A quoted string can use either single or double quotes.
 
-=item assertion-expression := inline-assertion | function-assertion
+=item assertion-expression := assertion-operation | assertion-call
+
+An assertion expression is a declaration of a testing operation. A typical
+assertion looks like:
+
+    input-point.transform1().transform2(arguments) == expected-output-point
 
 An assertion expression can either be an inline operator expression:
 
@@ -507,7 +511,7 @@ or a function call:
 
     foo.EQ(bar)
 
-=item inline-assertion := ws+ assertion-operator ws+ data-expression
+=item assertion-operation := ws+ assertion-operator ws+ sub-expression
 
 An assertion expression is an operator followed by a data expression
 that represents the expected value. The operator must have some
@@ -517,12 +521,12 @@ whitespace on either side.
 
 The only defined assertion operator currently is '==', which maps to 'EQ'.
 
-=item function-assertion :=
-    call-indicator assertion-name '(' ws* data-expression ws* ')'
+=item assertion-call :=
+    call-indicator assertion-name '(' ws* sub-expression ws* ')'
 
 A function assertion 
 
-=item assertion-name := UPPER*
+=item assertion-name := UPPER+
 
 An assertion name is the name of an assertion function defined by the
 standard library. For this reason it begins with an upper case letter.
