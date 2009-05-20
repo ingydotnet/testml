@@ -411,6 +411,23 @@ before an optional comment.
 
 =head3 Test Section of the Grammar
 
+This section of TestML is the mini, generic programming language. In a
+nutshell, the language consists of a list of chained expressions, some
+of which make assertions. The following statements are valid:
+
+    function();
+    data_point.transform();
+    data_point.transform1().transform2();
+    data.trans('string1', "string2");
+    data1.trans1(data2, 'str').trans2(data3.trans3);
+
+    full_expression1.EQ(full_expression2);
+    full_expression1 == full_expression2;
+
+The first five statements are test expressions. The last two lines are
+test assertions which test the results of two expressions. The two are
+equivalent operations using different syntax.
+
 =item test-section := ( test-statement | ws )*
 
 The test section contains a small program written in the TestML
@@ -434,15 +451,15 @@ statement can either be a single data expression, which causes code to
 run but doesn't execute tests, or it can be an assertion which runs a
 test operation by comparing the results of two data expressions.
 
-=item test-expression := sub-expression assertion-expression?
+=item test-expression :=
+    sub-expression (assertion-expression | (call-indicator test-expression))?
 
 A test expression is a series of one or more sub expressions which are
 evaluated in order, passing the result of each to the next one. It can
 have an optional assertion expression at the end which compares the
 final value to that of another sub expression.
 
-=item sub-expression :=
-    (transform-call | data-point) (call-indicator transform-call)*
+=item sub-expression := (transform-call | data-point)
 
 A sub expression can either start with a plain point name or a transform
 function call. Then it is proceeded by a chain of any number of
