@@ -536,6 +536,21 @@ before an optional comment.</p>
 <p>
 </p>
 <h3><a name="test_section_of_the_grammar">Test Section of the Grammar</a></h3>
+<p>This section of TestML is the mini, generic programming language. In a
+nutshell, the language consists of a list of chained expressions, some
+of which make assertions. The following statements are valid:</p>
+<pre>
+    function();
+    data_point.transform();
+    data_point.transform1().transform2();
+    data.trans('string1', &quot;string2&quot;);
+    data1.trans1(data2, 'str').trans2(data3.trans3);</pre>
+<pre>
+    full_expression1.EQ(full_expression2);
+    full_expression1 == full_expression2;</pre>
+<p>The first five statements are test expressions. The last two lines are
+test assertions which test the results of two expressions. The two are
+equivalent operations using different syntax.</p>
 <dl>
 <dt><strong><a name="test_section_test_statement_ws" class="item">test-section := ( test-statement | ws )*</a></strong>
 
@@ -567,7 +582,8 @@ run but doesn't execute tests, or it can be an assertion which runs a
 test operation by comparing the results of two data expressions.</p>
 </dd>
 </li>
-<dt><strong><a name="test_expression_sub_expression_assertion_expression" class="item">test-expression := sub-expression assertion-expression?</a></strong>
+<dt><strong><a name="expression" class="item">test-expression :=
+    sub-expression (assertion-expression | (call-indicator test-expression))?</a></strong>
 
 <dd>
 <p>A test expression is a series of one or more sub expressions which are
@@ -576,8 +592,7 @@ have an optional assertion expression at the end which compares the
 final value to that of another sub expression.</p>
 </dd>
 </li>
-<dt><strong><a name="sub_expression_transform_call_data_point_call_indicator_transform_call" class="item">sub-expression :=
-    (transform-call | data-point) (call-indicator transform-call)*</a></strong>
+<dt><strong><a name="sub_expression_transform_call_data_point" class="item">sub-expression := (transform-call | data-point)</a></strong>
 
 <dd>
 <p>A sub expression can either start with a plain point name or a transform
