@@ -428,7 +428,7 @@ The first five statements are test expressions. The last two lines are
 test assertions which test the results of two expressions. The two are
 equivalent operations using different syntax.
 
-=item test-section := ( test-statement | ws )*
+=item test-section := ( ws | test-statement )*
 
 The test section contains a small program written in the TestML
 programming language. This language is used to describe data
@@ -444,20 +444,18 @@ can execute.
 The C<ws> token represents characters in the stream that can be
 thrown away.
 
-=item test-statement := test-expression ';'
+=item test-statement := test-expression assertion-expression? ';'
 
 A test statement is a processing directive for running tests. A
-statement can either be a single data expression, which causes code to
+statement can either be a single test expression, which causes code to
 run but doesn't execute tests, or it can be an assertion which runs a
 test operation by comparing the results of two data expressions.
 
 =item test-expression :=
-    sub-expression (assertion-expression | (call-indicator test-expression))?
+    sub-expression (!assertion-call call-indicator sub-expression)*
 
 A test expression is a series of one or more sub expressions which are
-evaluated in order, passing the result of each to the next one. It can
-have an optional assertion expression at the end which compares the
-final value to that of another sub expression.
+evaluated in order, passing the result of each to the next one.
 
 =item sub-expression := (transform-call | data-point)
 
@@ -493,6 +491,15 @@ must be adjecent to one of the sub expressions.
 
 A data point is either a user defined data point, or a core global
 data point.
+
+A data point is really a short form for a transform call to 'Point' with
+the point name. These are the same:
+
+    foo.bar();
+    Point('foo').bar();
+
+except that the bareword point names are also used to select the data
+blocks that will apply to that expression.
 
 =item user-point := LOWER WORD*
 
