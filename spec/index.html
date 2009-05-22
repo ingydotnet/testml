@@ -552,7 +552,7 @@ of which make assertions. The following statements are valid:</p>
 test assertions which test the results of two expressions. The two are
 equivalent operations using different syntax.</p>
 <dl>
-<dt><strong><a name="test_section_test_statement_ws" class="item">test-section := ( test-statement | ws )*</a></strong>
+<dt><strong><a name="test_section_ws_test_statement" class="item">test-section := ( ws | test-statement )*</a></strong>
 
 <dd>
 <p>The test section contains a small program written in the TestML
@@ -573,23 +573,21 @@ can execute.</p>
 thrown away.</p>
 </dd>
 </li>
-<dt><strong><a name="test_statement_test_expression" class="item">test-statement := test-expression ';'</a></strong>
+<dt><strong><a name="test_statement_test_expression_assertion_expression" class="item">test-statement := test-expression assertion-expression? ';'</a></strong>
 
 <dd>
 <p>A test statement is a processing directive for running tests. A
-statement can either be a single data expression, which causes code to
+statement can either be a single test expression, which causes code to
 run but doesn't execute tests, or it can be an assertion which runs a
 test operation by comparing the results of two data expressions.</p>
 </dd>
 </li>
 <dt><strong><a name="expression" class="item">test-expression :=
-    sub-expression (assertion-expression | (call-indicator test-expression))?</a></strong>
+    sub-expression (!assertion-call call-indicator sub-expression)*</a></strong>
 
 <dd>
 <p>A test expression is a series of one or more sub expressions which are
-evaluated in order, passing the result of each to the next one. It can
-have an optional assertion expression at the end which compares the
-final value to that of another sub expression.</p>
+evaluated in order, passing the result of each to the next one.</p>
 </dd>
 </li>
 <dt><strong><a name="sub_expression_transform_call_data_point" class="item">sub-expression := (transform-call | data-point)</a></strong>
@@ -639,6 +637,19 @@ must be adjecent to one of the sub expressions.</p>
 <dd>
 <p>A data point is either a user defined data point, or a core global
 data point.</p>
+</dd>
+<dd>
+<p>A data point is really a short form for a transform call to 'Point' with
+the point name. These are the same:</p>
+</dd>
+<dd>
+<pre>
+    foo.bar();
+    Point('foo').bar();</pre>
+</dd>
+<dd>
+<p>except that the bareword point names are also used to select the data
+blocks that will apply to that expression.</p>
 </dd>
 </li>
 <dt><strong><a name="user_point_lower_word" class="item">user-point := LOWER WORD*</a></strong>
@@ -699,7 +710,7 @@ assertion looks like:</p>
     foo.EQ(bar)</pre>
 </dd>
 </li>
-<dt><strong><a name="assertion_operation_ws_assertion_operator_ws_sub_expression" class="item">assertion-operation := ws+ assertion-operator ws+ sub-expression</a></strong>
+<dt><strong><a name="assertion_operation_ws_assertion_operator_ws_test_expression" class="item">assertion-operation := ws+ assertion-operator ws+ test-expression</a></strong>
 
 <dd>
 <p>An assertion expression is an operator followed by a data expression
@@ -713,11 +724,12 @@ whitespace on either side.</p>
 <p>The only defined assertion operator currently is '==', which maps to 'EQ'.</p>
 </dd>
 </li>
-<dt><strong><a name="assertion_call_call_indicator_assertion_name_ws_sub_expression_ws" class="item">assertion-call :=
-    call-indicator assertion-name '(' ws* sub-expression ws* ')'</a></strong>
+<dt><strong><a name="assertion_call_call_indicator_assertion_name_ws_test_expression_ws" class="item">assertion-call :=
+    call-indicator assertion-name '(' ws* test-expression ws* ')'</a></strong>
 
 <dd>
-<p>A function assertion</p>
+<p>A function assertion call is a special function call that takes one
+entire expression as its argument.</p>
 </dd>
 </li>
 <dt><strong><a name="assertion_name_upper" class="item">assertion-name := UPPER+</a></strong>
@@ -849,7 +861,7 @@ The <em>data sections</em> are all parsed by separate parsers/grammars.</p>
 <p>A data section consists of 0-n data blocks.</p>
 </dd>
 </li>
-<dt><strong><a name="header" class="item">data-block := block-header (blank-line | comment)* data-point*</a></strong>
+<dt><strong><a name="header" class="item">data-block := block-header (blank-line | comment)* block-point*</a></strong>
 
 <dd>
 <p>A data block in TestML syntax looks like:</p>
@@ -863,7 +875,7 @@ The <em>data sections</em> are all parsed by separate parsers/grammars.</p>
     data</pre>
 </dd>
 </li>
-<dt><strong>block-header := block-marker (SPACE+ label)? SPACE* EOL</strong>
+<dt><strong>block-header := block-marker (SPACE+ block-label)? SPACE* EOL</strong>
 
 <dd>
 <p>A block header marks the start of a new block. The first one also marks
@@ -885,7 +897,7 @@ statement, like this:</p>
     TestMLBlockMarker: ***</pre>
 </dd>
 </li>
-<dt><strong><a name="label_any_space_break_non_break_any_space_break" class="item">label :=
+<dt><strong><a name="block_label_any_space_break_non_break_any_space_break" class="item">block-label :=
     (ANY - (SPACE | BREAK))
     (NON-BREAK* (ANY - (SPACE | BREAK)))?</a></strong>
 
@@ -894,14 +906,14 @@ statement, like this:</p>
 tests at runtime.</p>
 </dd>
 </li>
-<dt><strong><a name="data_point_lines_point_phrase_point" class="item">data-point := lines-point | phrase-point</a></strong>
+<dt><strong><a name="block_point_lines_point_phrase_point" class="item">block-point := lines-point | phrase-point</a></strong>
 
 <dd>
-<p>Data points are the pieces of raw data that TestML transforms and
+<p>Data block points are the pieces of raw data that TestML transforms and
 compares. They come in two flavors, lines and phrases.</p>
 </dd>
 </li>
-<dt><strong><a name="eol" class="item">lines-point := point-marker SPACE+ user-point-name SPACE* EOL (line - block-header)*</a></strong>
+<dt><strong><a name="eol" class="item">lines-point := point-marker SPACE+ user-point SPACE* EOL (line - block-header)*</a></strong>
 
 <dd>
 <p>A &quot;lines&quot; data point encodes a string containing zero or more lines. If
@@ -916,7 +928,7 @@ it has one or more lines it always ends with a newline.</p>
     line4</pre>
 </dd>
 </li>
-<dt><strong><a name="phrase_point_point_marker_space_user_point_name_space_non_break_eol_blank_line" class="item">phrase-point := point-marker SPACE+ user-point-name ':' (SPACE NON-BREAK*)? EOL blank-line*</a></strong>
+<dt><strong><a name="phrase_point_point_marker_space_user_point_space_non_break_eol_blank_line" class="item">phrase-point := point-marker SPACE+ user-point ':' (SPACE NON-BREAK*)? EOL blank-line*</a></strong>
 
 <dd>
 <p>A &quot;phrase&quot; data point encodes a string with no newlines.</p>
