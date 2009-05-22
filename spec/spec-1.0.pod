@@ -428,7 +428,7 @@ The first five statements are test expressions. The last two lines are
 test assertions which test the results of two expressions. The two are
 equivalent operations using different syntax.
 
-=item test-section := ( test-statement | ws )*
+=item test-section := ( ws | test-statement )*
 
 The test section contains a small program written in the TestML
 programming language. This language is used to describe data
@@ -444,20 +444,18 @@ can execute.
 The C<ws> token represents characters in the stream that can be
 thrown away.
 
-=item test-statement := test-expression ';'
+=item test-statement := test-expression assertion-expression? ';'
 
 A test statement is a processing directive for running tests. A
-statement can either be a single data expression, which causes code to
+statement can either be a single test expression, which causes code to
 run but doesn't execute tests, or it can be an assertion which runs a
 test operation by comparing the results of two data expressions.
 
 =item test-expression :=
-    sub-expression (assertion-expression | (call-indicator test-expression))?
+    sub-expression (!assertion-call call-indicator sub-expression)*
 
 A test expression is a series of one or more sub expressions which are
-evaluated in order, passing the result of each to the next one. It can
-have an optional assertion expression at the end which compares the
-final value to that of another sub expression.
+evaluated in order, passing the result of each to the next one.
 
 =item sub-expression := (transform-call | data-point)
 
@@ -493,6 +491,15 @@ must be adjecent to one of the sub expressions.
 
 A data point is either a user defined data point, or a core global
 data point.
+
+A data point is really a short form for a transform call to 'Point' with
+the point name. These are the same:
+
+    foo.bar();
+    Point('foo').bar();
+
+except that the bareword point names are also used to select the data
+blocks that will apply to that expression.
 
 =item user-point := LOWER WORD*
 
@@ -532,7 +539,7 @@ or a function call:
 
     foo.EQ(bar)
 
-=item assertion-operation := ws+ assertion-operator ws+ sub-expression
+=item assertion-operation := ws+ assertion-operator ws+ test-expression
 
 An assertion expression is an operator followed by a data expression
 that represents the expected value. The operator must have some
@@ -543,9 +550,10 @@ whitespace on either side.
 The only defined assertion operator currently is '==', which maps to 'EQ'.
 
 =item assertion-call :=
-    call-indicator assertion-name '(' ws* sub-expression ws* ')'
+    call-indicator assertion-name '(' ws* test-expression ws* ')'
 
-A function assertion 
+A function assertion call is a special function call that takes one
+entire expression as its argument.
 
 =item assertion-name := UPPER+
 
@@ -648,7 +656,7 @@ This grammar defines the TestML data section markup.
 
 A data section consists of 0-n data blocks.
 
-=item data-block := block-header (blank-line | comment)* data-point*
+=item data-block := block-header (blank-line | comment)* block-point*
 
 A data block in TestML syntax looks like:
 
@@ -658,7 +666,7 @@ A data block in TestML syntax looks like:
     line
     data
 
-=item block-header := block-marker (SPACE+ label)? SPACE* EOL
+=item block-header := block-marker (SPACE+ block-label)? SPACE* EOL
 
 A block header marks the start of a new block. The first one also marks
 the start of the data section. It contains an optional label.
@@ -672,19 +680,19 @@ statement, like this:
 
     TestMLBlockMarker: ***
 
-=item label :=
+=item block-label :=
     (ANY - (SPACE | BREAK))
     (NON-BREAK* (ANY - (SPACE | BREAK)))?
 
 A label is a short description of the block. It can be used to label
 tests at runtime.
 
-=item data-point := lines-point | phrase-point
+=item block-point := lines-point | phrase-point
 
-Data points are the pieces of raw data that TestML transforms and
+Data block points are the pieces of raw data that TestML transforms and
 compares. They come in two flavors, lines and phrases.
 
-=item lines-point := point-marker SPACE+ user-point-name SPACE* EOL (line - block-header)*
+=item lines-point := point-marker SPACE+ user-point SPACE* EOL (line - block-header)*
 
 A "lines" data point encodes a string containing zero or more lines. If
 it has one or more lines it always ends with a newline.
@@ -695,7 +703,7 @@ it has one or more lines it always ends with a newline.
     
     line4
 
-=item phrase-point := point-marker SPACE+ user-point-name ':' (SPACE NON-BREAK*)? EOL blank-line*
+=item phrase-point := point-marker SPACE+ user-point ':' (SPACE NON-BREAK*)? EOL blank-line*
 
 A "phrase" data point encodes a string with no newlines.
 
