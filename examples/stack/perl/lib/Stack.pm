@@ -8,6 +8,11 @@ has 'stack' => (
     default => sub {[]},
 );
 
+sub BUILDARGS {
+    my $class = shift;
+    return { stack => [@_] };
+}
+
 sub push {
     my $self = shift;
     my $num = @_;
