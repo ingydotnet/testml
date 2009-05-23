@@ -1,0 +1,141 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="content-type" content="text/html;charset=UTF-8" />
+    <title>TestML - Testing Meta Language</title>
+    <link href="../../css/general.css" rel="stylesheet" type="text/css">
+  <head>
+  <body>
+
+
+
+<!-- INDEX BEGIN -->
+<div name="index">
+<p><a name="__index__"></a></p>
+
+<ul>
+
+	<li><a href="#testml_quick_learners_guide">TestML Quick Learners Guide</a></li>
+</ul>
+
+<hr name="index" />
+</div>
+<!-- INDEX END -->
+
+<p>
+</p>
+<h1><a name="testml_quick_learners_guide">TestML Quick Learners Guide</a></h1>
+<p>This guide is intended to teach TestML to experienced programmers as
+quickly as possible. It is simply a list of assertions and short
+explanations about all the things currently known about TestML. Enjoy.</p>
+<dl>
+<dt><strong><a name="testml_is_logical_awesome" class="item">TestML is Logical Awesome</a></strong>
+
+<dd>
+<p><a href="http://testml.org/is/logical/awesome/">http://testml.org/is/logical/awesome/</a></p>
+</dd>
+</li>
+<dt><strong><a name="a_testml_test_suite_consists_of_testml_documents" class="item">A TestML <em>test suite</em> consists of TestML <em>documents</em>.</a></strong>
+
+<dd>
+<p>Typically a software project that uses TestML will have a group of
+TestML files. The files are called &quot;documents&quot;.</p>
+</dd>
+</li>
+<dt><strong><a name="testml_documents_are_implementation_independent" class="item">TestML documents are implementation independent.</a></strong>
+
+<dd>
+<p>One should never put implemenation or programming language specific
+commands into a TestML document. These things go in other places, like
+the bridge class or runner scripts.</p>
+</dd>
+</li>
+<dt><strong><a name="a_testml_document_consists_of_3_distinct_parts" class="item">A TestML document consists of 3 distinct parts.</a></strong>
+
+<dd>
+<p>A document has a Meta section, a Test section and a data section.</p>
+</dd>
+</li>
+<dt><strong><a name="a_single_testml_document_can_be_made_up_of_more_than_one_file" class="item">A single TestML document can be made up of more than one file.</a></strong>
+
+<dd>
+<p>Using meta section directives, sections can be pulled in from other
+files. This allows for reuse of common parts.</p>
+</dd>
+</li>
+<dt><strong><a name="the_meta_section_contains_parsing_and_runtime_directives" class="item">The Meta section contains parsing and runtime directives.</a></strong>
+
+<dd>
+<p>Some statements in the meta section tell TestML how to parse the rest of
+the document. Some of them say how to run the tests.</p>
+</dd>
+</li>
+<dt><strong><a name="every_testml_document_requires_a_testml_version_directive" class="item">Every TestML document requires a TestML version directive.</a></strong>
+
+<dd>
+<p>The first (non-comment) statement in any TestML document must be:</p>
+</dd>
+<dd>
+<pre>
+    %TestML: 1.0</pre>
+</dd>
+<dd>
+<p>where '1.0' is the version of the spec that the document conforms to.
+This was the parser knows exactly what to expect, if it can parse the
+document at all.</p>
+</dd>
+</li>
+<dt><strong><a name="words_that_begin_with_a_capital_letter_are_defined_by_testml" class="item">Words that begin with a capital letter are defined by TestML.</a></strong>
+
+<dd>
+<p>Keywords in any section of a TestML that begin with a capital letter are
+defined by the TestML specifications.</p>
+</dd>
+<dd>
+<p>Words beginning with lower case are user defined.</p>
+</dd>
+</li>
+<dt><strong><a name="test_statements_come_in_several_forms" class="item"><em>Test statements</em> come in several forms.</a></strong>
+
+<dd>
+<pre>
+    function();         # A function is also called a &quot;transform&quot;.
+    point;              # Without parens, a word is a &quot;point&quot;.
+    point.function();   # Chained together they are called &quot;expressions&quot;.
+    point; function();  # The chained parts are called &quot;subexpressions&quot;.
+    point.function().function();   # Chain as many as you want.
+    function('string', &quot;string&quot;, expression);   # Functions take &quot;arguments&quot;.
+    expression1 == expression2;   # An assertion.
+    expression.EQ(expression2);   # Same thing as previous.</pre>
+</dd>
+<dt><strong><a name="test_statements_only_come_in_one_form" class="item">Test statements only come in one form.</a></strong>
+
+<dd>
+<p>Every statement is really just &quot;an expression that can optionally end with an
+assertion function call&quot;. From the spec:</p>
+</dd>
+<dd>
+<pre>
+    test-statement := test-expression assertion-expression? ';'</pre>
+</dd>
+</li>
+<dt><strong><a name="all_test_statements_end_with_a_semicolon" class="item">All test statements end with a semicolon.</a></strong>
+
+<dd>
+<p>And whitespace and comments are liberal:</p>
+</dd>
+<dd>
+<pre>
+    function(); function(
+        'string'               # Comment
+    ) == point;</pre>
+</dd>
+</li>
+</dl>
+<p></p>
+
+
+  </body>
+</html>
+
