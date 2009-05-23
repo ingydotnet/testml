@@ -1,0 +1,85 @@
+=head1 TestML Quick Learners Guide
+
+This guide is intended to teach TestML to experienced programmers as
+quickly as possible. It is simply a list of assertions and short
+explanations about all the things currently known about TestML. Enjoy.
+
+=over
+
+=item TestML is Logical Awesome
+
+L<http://testml.org/is/logical/awesome/>
+
+=item A TestML I<test suite> consists of TestML I<documents>.
+
+Typically a software project that uses TestML will have a group of
+TestML files. The files are called "documents".
+
+=item TestML documents are implementation independent.
+
+One should never put implemenation or programming language specific
+commands into a TestML document. These things go in other places, like
+the bridge class or runner scripts.
+
+=item A TestML document consists of 3 distinct parts.
+
+A document has a Meta section, a Test section and a data section.
+
+=item A single TestML document can be made up of more than one file.
+
+Using meta section directives, sections can be pulled in from other
+files. This allows for reuse of common parts.
+
+=item The Meta section contains parsing and runtime directives.
+
+Some statements in the meta section tell TestML how to parse the rest of
+the document. Some of them say how to run the tests.
+
+=item Every TestML document requires a TestML version directive.
+
+The first (non-comment) statement in any TestML document must be:
+
+    %TestML: 1.0
+
+where '1.0' is the version of the spec that the document conforms to.
+This was the parser knows exactly what to expect, if it can parse the
+document at all.
+
+=item Words that begin with a capital letter are defined by TestML.
+
+Keywords in any section of a TestML that begin with a capital letter are
+defined by the TestML specifications.
+
+Words beginning with lower case are user defined.
+
+=item I<Test statements> come in several forms.
+
+    function();         # A function is also called a "transform".
+    point;              # Without parens, a word is a "point".
+    point.function();   # Chained together they are called "expressions".
+    point; function();  # The chained parts are called "subexpressions".
+    point.function().function();   # Chain as many as you want.
+    function('string', "string", expression);   # Functions take "arguments".
+    expression1 == expression2;   # An assertion.
+    expression.EQ(expression2);   # Same thing as previous.
+
+=item Test statements only come in one form.
+
+Every statement is really just "an expression that can optionally end with an
+assertion function call". From the spec:
+
+    test-statement := test-expression assertion-expression? ';'
+
+=item All test statements end with a semicolon.
+
+And whitespace and comments are liberal:
+
+    function(); function(
+        'string'               # Comment
+    ) == point;
+
+=back
+
+    
+    
+

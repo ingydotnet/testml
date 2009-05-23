@@ -1,0 +1,87 @@
+== TOPIC
+
+This example library is a Stack class. It was inspired by Matt Liggett's
+email on 21 May 2009 to the TestML Discussion mailing list. The original
+emails are printed below.
+
+== DESCRIPTION
+
+The plan is to write a set of testml files that encode Matt's intentions
+for the Stack class. Then implement the Stack in the various languages
+that have TestML support.
+
+== LAYOUT
+
+The following top level files and directories are defined:
+
+- README - This file.
+- testml/ - The directory containing the testml files.
+- perl/ - A Perl 5 Stack implementation with tests running the testml suite.
+- python/ - A Python implementation of Stack.
+- javascript/ - A JavaScript implementation.
+- Makefile - A Makefile to setup the various runtime needs.
+
+All these directories will have a README inside them giving further
+information about that part.
+
+
+
+== ORIGINAL EMAIL THREAD
+--------------------------------------------------------------------------------
+Matt's original email.
+--------------------------------------------------------------------------------
+Hi everybody,
+
+Concrete examples help me think.  I reckon ingy is the one to
+concretize this one.
+
+Suppose I wanted to test a stack implementation.  Some simple stack tests are:
+
+ # 1
+ assert_error(empty_stack.pop)
+
+ # 2
+ s_orig = copy(s)
+ s.push(foo)
+ s.pop == foo
+ assert(s.head == s_orig.head)
+ assert(s.pop == s_orig.pop)
+
+There is a whole raft of them, but let's start with those two, and
+assume that in a normal programming language test, I'd want to call #2
+many times inside a loop with assorted s and foo parameters.  How
+might I write these in TestML?  I have a feeling the answer depends on
+the runtime spec and/or details of the bridge, but I'm not sure how.
+
+ -Matt
+--------------------------------------------------------------------------------
+Ingy's reply
+--------------------------------------------------------------------------------
+Hi Matt,
+
+It's near the end of the day here, I've been violently hacking on the
+TestML Perl 5 implementation, and drinking red wine with Chris Dent's
+coworkers in London. I'll get you a full answer tomorrow, hopefully with
+working code.
+
+Can I ask you to verify a few assumptions I have?
+
+0) The code below is pseudo. ie Pythonesque, but not actually Python.
+0b) The code is NOT what you are expecting the TestML syntax to be.
+1) You are implementing a Stack class.
+2) empty_stack, s and s_orig are Stack instance objects.
+3) push, pop, head and copy are instance methods of the Stack class.
+4) foo is a variable of any type. possibly an object.
+4b) thus Stack methods are polymorphic.
+5) assert_error means that the code in parens should raise an exception.
+
+I think I can give you a pretty good explanation of how the current
+TestML would deal with this, and that should kick off some interesting
+discussion. Thanks for starting things up.
+--------------------------------------------------------------------------------
+Matt's reply
+--------------------------------------------------------------------------------
+Yes to all.  (I could quibble a little and say that some day we might
+want to use TestML in a non-OO language,  but for the moment, that's
+just a distraction.)
+...
