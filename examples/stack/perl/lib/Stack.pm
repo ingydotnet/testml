@@ -3,14 +3,13 @@ use 5.008008;
 use Moose;
 
 has 'stack' => (
-    is => 'rw',
     isa => 'ArrayRef',
-    default => sub {[]},
 );
 
 sub BUILDARGS {
     my $class = shift;
-    return { stack => [@_] };
+    my @elems = @_;
+    return { stack => [@elems] };
 }
 
 sub push {
