@@ -193,7 +193,10 @@ no blocks are selected, then the statement will not be run.</p>
 <pre>
     point1;
     Point('point1');</pre>
-<p>The second statement does not select any blocks.</p>
+<p>The second statement does not select any blocks. The truly equivalent
+statement would be:</p>
+<pre>
+    Select(point1).Point('point1');</pre>
 <p>
 </p>
 <hr />
