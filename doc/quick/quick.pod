@@ -145,7 +145,10 @@ These two statements are B<NOT> the same:
     point1;
     Point('point1');
 
-The second statement does not select any blocks.
+The second statement does not select any blocks. The truly equivalent
+statement would be:
+
+    Select(point1).Point('point1');
 
 =head1 All test statements end with a semicolon.
 
