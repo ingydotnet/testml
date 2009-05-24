@@ -483,16 +483,18 @@ defined settings.</p>
 lower case letter. These values are then available to the runtime code.</p>
 </dd>
 </li>
-<dt><strong><a name="meta_value_single_quoted_string_double_quoted_string_unquoted_string" class="item">meta-value := (
-    single-quoted-string |
-    double-quoted-string |
-    unquoted-string
-)</a></strong>
+<dt><strong><a name="meta_value_quoted_string_unquoted_string" class="item">meta-value := ( quoted-string | unquoted-string )</a></strong>
 
 <dd>
 <p>A meta value is the value of the meta setting being defined. Some settings
 like <code>data</code> are stored as arrays. Multiple statements with they same keyword
 add an element to the array.</p>
+</dd>
+</li>
+<dt><strong><a name="quoted_string_single_quoted_string_double_quoted_string" class="item">quoted-string := single-quoted-string | double-quoted-string</a></strong>
+
+<dd>
+<p>A quoted string can use either single or double quotes.</p>
 </dd>
 </li>
 <dt><strong><a name="single" class="item">single-quoted-string :=
@@ -677,12 +679,6 @@ True, False, Null and PI.</p>
 
 <dd>
 <p>An argument can either be a data expression or a quoted string.</p>
-</dd>
-</li>
-<dt><strong><a name="quoted_string_single_quoted_string_double_quoted_string" class="item">quoted-string := single-quoted-string | double-quoted-string</a></strong>
-
-<dd>
-<p>A quoted string can use either single or double quotes.</p>
 </dd>
 </li>
 <dt><strong><a name="assertion_expression_assertion_operation_assertion_call" class="item">assertion-expression := assertion-operation | assertion-call</a></strong>
