@@ -8,8 +8,8 @@ has 'stack' => (
 
 sub BUILDARGS {
     my $class = shift;
-    my @elems = @_;
-    return { stack => [@elems] };
+    my $elems = shift || [];
+    return { stack => $elems };
 }
 
 sub push {

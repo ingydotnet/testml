@@ -1,8 +1,15 @@
 %TestML: 1.0
 
+empty.new_stack().pop_stack()
+    .Catch() == Str('True');
 
-===
+=== pop empty stack makes error
+--- empty
+
+=== Test for push
 --- init
---- push:
---- result
+foo
+bar
+--- elem: baz
+--- result: foo:bar:baz
 
