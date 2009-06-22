@@ -58,7 +58,7 @@
 </p>
 <hr />
 <h1><a name="status">Status</a></h1>
-<p>Working Draft - 19 May, 2009</p>
+<p>Working Draft - 21 June, 2009</p>
 <p>This document is the TestML Language Specification. Version 1.0
 Pre-release.</p>
 <p>This is not the final 1.0 release. It is very new, under
@@ -85,7 +85,7 @@ document example:</p>
 <pre>
     %TestML: 1.0</pre>
 <pre>
-    input.uppercase() == output;</pre>
+    $input.uppercase() == $output;</pre>
 <pre>
     === Test mixed case string
     --- input: I Like Pie
@@ -98,8 +98,8 @@ document example:</p>
 <ul>
 <li><strong><a name="implement_an_application_that_can_turn_strings_to_upper_case" class="item">Implement an application that can turn strings to upper case.</a></strong>
 
-<li><strong><a name="implement_a_testml_bridge_class_that_defines_the_uppercase_transform_to_invoke_the_foo_application_s_upper_casing_facility" class="item">Implement a TestML &quot;bridge class&quot; that defines the 'uppercase'
-transform to invoke the Foo application's upper casing facility.</a></strong>
+<li><strong><a name="implement_a_testml_bridge_class_that_defines_the_uppercase_transform_to_invoke_the_application_s_upper_casing_facility" class="item">Implement a TestML &quot;bridge class&quot; that defines the 'uppercase'
+transform to invoke the application's upper casing facility.</a></strong>
 
 <li><strong><a name="set_up_their_test_environment_to_use_testml_to_run_the_test" class="item">Set up their test environment to use TestML to run the test.</a></strong>
 
@@ -337,6 +337,8 @@ equivalents.</p>
 
 <li><strong><a name="digit_0_9_a_numeric_digit" class="item">DIGIT - '[0-9]' - A numeric digit</a></strong>
 
+<li><strong><a name="dollar_a_dollar_sign_character" class="item">DOLLAR - '\$' - A dollar sign character</a></strong>
+
 <li><strong><a name="dot_a_period_character" class="item">DOT - '\.' - A period character</a></strong>
 
 <li><strong><a name="octothorpe" class="item">HASH - '#' - An octothorpe (or hash) character</a></strong>
@@ -375,8 +377,8 @@ test section followed by an optional inline data section.</p>
 <dd>
 <pre>
     # And test statements.
-    foo.upper() == bar;
-    foo == bar.lower();</pre>
+    $foo.upper() == $bar;
+    $foo == $bar.lower();</pre>
 </dd>
 <dd>
 <pre>
@@ -463,12 +465,12 @@ that point forward.</p>
 defined settings.</p>
 </dd>
 </li>
-<dt><strong><a name="core_meta_keyword_title_data_plan_testmlblockmarker_testmlpointmarker" class="item">core-meta-keyword :=
+<dt><strong><a name="core_meta_keyword_title_data_plan_blockmarker_pointmarker" class="item">core-meta-keyword :=
     ( 'Title'
     | 'Data'
     | 'Plan'
-    | 'TestMLBlockMarker'
-    | 'TestMLPointMarker'
+    | 'BlockMarker'
+    | 'PointMarker'
     )</a></strong>
 
 <dd>
@@ -540,19 +542,28 @@ before an optional comment.</p>
 <h3><a name="test_section_of_the_grammar">Test Section of the Grammar</a></h3>
 <p>This section of TestML is the mini, generic programming language. In a
 nutshell, the language consists of a list of chained expressions, some
-of which make assertions. The following statements are valid:</p>
+of which make assertions. The following statements are valid syntax:</p>
 <pre>
+    # Expressions:
+    'string';
     function();
-    data_point.transform();
-    data_point.transform1().transform2();
-    data.trans('string1', &quot;string2&quot;);
-    data1.trans1(data2, 'str').trans2(data3.trans3);</pre>
+    Constant;
+    $data_point;
+    $data_point.transform();
+    $data_point.transform1().transform2();
+    $data.trans('string', &quot;string&quot;);
+    $data1.trans1($data2, 'str').trans2($data3.trans3);</pre>
 <pre>
-    full_expression1.EQ(full_expression2);
-    full_expression1 == full_expression2;</pre>
-<p>The first five statements are test expressions. The last two lines are
-test assertions which test the results of two expressions. The two are
-equivalent operations using different syntax.</p>
+    # Assertions:
+    &lt;expression&gt; == 'string';
+    &lt;expression&gt; == Constant;
+    &lt;expression&gt; == &lt;expression&gt;;
+    &lt;expression&gt;.EQ(&lt;expression&gt;);</pre>
+<p>Lines beginning with '#' are comments. The first eight statements are
+test <em>expressions</em>. The last four lines are test assertions which test
+the results of two expressions. The last two are equivalent operations
+using different syntax. (Note: Replace '&lt;expression&gt;' with any valid
+expression. '&lt;foo&gt;' is not valid TestML syntax)</p>
 <dl>
 <dt><strong><a name="test_section_ws_test_statement" class="item">test-section := ( ws | test-statement )*</a></strong>
 
@@ -592,12 +603,28 @@ test operation by comparing the results of two data expressions.</p>
 evaluated in order, passing the result of each to the next one.</p>
 </dd>
 </li>
-<dt><strong><a name="sub_expression_transform_call_data_point" class="item">sub-expression := (transform-call | data-point)</a></strong>
+<dt><strong><a name="sub_expression_transform_call_data_point_quoted_string_constant" class="item">sub-expression :=
+    (transform-call | data-point | quoted-string | constant))</a></strong>
 
 <dd>
 <p>A sub expression can either start with a plain point name or a transform
 function call. Then it is proceeded by a chain of any number of
 transform calls.</p>
+</dd>
+<dd>
+<p>All sub expressions are turned into transform calls after compilation. For
+example:</p>
+</dd>
+<dd>
+<pre>
+   $foo.bar(&quot;baz&quot;) == True;</pre>
+</dd>
+<dd>
+<p>becomes (internally):</p>
+</dd>
+<dd>
+<pre>
+   Point('foo').bar(String(&quot;baz&quot;)).EQ(Global('True'));</pre>
 </dd>
 </li>
 <dt><strong><a name="transform_call_transform_name_ws_argument_list_ws" class="item">transform-call := transform-name '(' ws* argument-list ws* ')'</a></strong>
@@ -634,11 +661,11 @@ bridge class.</p>
 must be adjecent to one of the sub expressions.</p>
 </dd>
 </li>
-<dt><strong><a name="data_point_user_point_core_point" class="item">data-point := user-point | core-point</a></strong>
+<dt><strong><a name="data_point_dollar_lower_word" class="item">data-point := DOLLAR LOWER WORD*</a></strong>
 
 <dd>
-<p>A data point is either a user defined data point, or a core global
-data point.</p>
+<p>A data point is a user defined data name, preceded by a '$' and
+beginning with a lower case letter.</p>
 </dd>
 <dd>
 <p>A data point is really a short form for a transform call to 'Point' with
@@ -646,39 +673,46 @@ the point name. These are the same:</p>
 </dd>
 <dd>
 <pre>
-    foo.bar();
+    $foo.bar();
     Point('foo').bar();</pre>
 </dd>
 <dd>
-<p>except that the bareword point names are also used to select the data
+<p>except that the dollar sign point names are also used to select the data
 blocks that will apply to that expression.</p>
 </dd>
-</li>
-<dt><strong><a name="user_point_lower_word" class="item">user-point := LOWER WORD*</a></strong>
-
 <dd>
-<p>A user data point name begins with a lower case letter. It refers to an
-element of the current data block.</p>
+<p>Statements with points in them apply to all matching blocks. For
+example, this TestML statement:</p>
+</dd>
+<dd>
+<pre>
+    $foo.bar() == $baz;</pre>
+</dd>
+<dd>
+<p>would behave like this TestMLesque pseudo-code:</p>
+</dd>
+<dd>
+<pre>
+    for block in SelectDataBlocks('foo', 'baz') {
+        Assert(block.Point('foo').bar() == block.Point('baz'));
+    }</pre>
+</dd>
+<dd>
+<p>NOTE: The above code is <strong>NOT</strong> valid TestML.</p>
 </dd>
 </li>
-<dt><strong><a name="core_point_upper_word" class="item">core-point := UPPER WORD*</a></strong>
+<dt><strong><a name="constant_upper_word" class="item">constant := UPPER WORD*</a></strong>
 
 <dd>
-<p>A core data point name begins with an upper case letter. It refers to an
-element of the standard library global data block. It contains things like
-True, False, Null and PI.</p>
+<p>A constant is a name beginning with an upper case letter. It refers to a
+constant value defined in the standard library. It contains things like
+True, False and Null.</p>
 </dd>
 </li>
-<dt><strong><a name="argument" class="item">argument-list := ( argument ( ws* ',' ws* argument )* )?</a></strong>
+<dt><strong>argument-list := ( sub-expression ( ws* ',' ws* sub-expression )* )?</strong>
 
 <dd>
-<p>An argument is zero or more arguments.</p>
-</dd>
-</li>
-<dt><strong><a name="argument_sub_expression_quoted_string" class="item">argument := sub-expression | quoted-string</a></strong>
-
-<dd>
-<p>An argument can either be a data expression or a quoted string.</p>
+<p>An argument list is a list of zero or more sub expressions.</p>
 </dd>
 </li>
 <dt><strong><a name="assertion_expression_assertion_operation_assertion_call" class="item">assertion-expression := assertion-operation | assertion-call</a></strong>
@@ -689,21 +723,21 @@ assertion looks like:</p>
 </dd>
 <dd>
 <pre>
-    input-point.transform1().transform2(arguments) == expected-output-point</pre>
+    $input-point.transform1().transform2(arguments) == $expected-output-point;</pre>
 </dd>
 <dd>
 <p>An assertion expression can either be an inline operator expression:</p>
 </dd>
 <dd>
 <pre>
-    foo == bar</pre>
+    $foo == $bar;</pre>
 </dd>
 <dd>
 <p>or a function call:</p>
 </dd>
 <dd>
 <pre>
-    foo.EQ(bar)</pre>
+    $foo.EQ($bar);</pre>
 </dd>
 </li>
 <dt><strong><a name="assertion_operation_ws_assertion_operator_ws_test_expression" class="item">assertion-operation := ws+ assertion-operator ws+ test-expression</a></strong>
@@ -762,7 +796,7 @@ be specified in YAML, JSON or XML.</p>
 <p>The parsing of the data section should instantiate a Data object.</p>
 </dd>
 </li>
-<dt><strong><a name="marker" class="item">testml-data-section := testml-data-block-marker (SPACE | EOL) rest</a></strong>
+<dt><strong><a name="marker" class="item">testml-data-section := block-marker (SPACE | EOL) rest</a></strong>
 
 <dd>
 <p>The <em>TestML data section</em> starts when the data block marker is detected
@@ -882,7 +916,7 @@ the start of the data section. It contains an optional label.</p>
     === The next big test</pre>
 </dd>
 </li>
-<dt><strong><a name="block_marker_meta_testmlblockmarker" class="item">block-marker := '===' | Meta.TestMLBlockMarker</a></strong>
+<dt><strong><a name="block_marker_meta_blockmarker" class="item">block-marker := '===' | Meta.BlockMarker</a></strong>
 
 <dd>
 <p>A block marker is usually <code>===</code>, but it is configurable via a meta
@@ -890,7 +924,7 @@ statement, like this:</p>
 </dd>
 <dd>
 <pre>
-    TestMLBlockMarker: ***</pre>
+    BlockMarker: ***</pre>
 </dd>
 </li>
 <dt><strong><a name="block_label_any_space_break_non_break_any_space_break" class="item">block-label :=
@@ -934,7 +968,7 @@ it has one or more lines it always ends with a newline.</p>
     --- phrase: This string is one line with no newline at the end.</pre>
 </dd>
 </li>
-<dt><strong><a name="point_marker_meta_testmlpointmarker" class="item">point-marker := '---' | Meta.TestMLPointMarker</a></strong>
+<dt><strong><a name="point_marker_meta_pointmarker" class="item">point-marker := '---' | Meta.PointMarker</a></strong>
 
 <dd>
 <p>A point marker is usually <code>---</code>, but it is configurable via a meta
@@ -942,7 +976,7 @@ statement, like this:</p>
 </dd>
 <dd>
 <pre>
-    %TestMLPointMarker: +++</pre>
+    %PointMarker: +++</pre>
 </dd>
 </li>
 </dl>
@@ -1034,7 +1068,7 @@ should complain or raise an exception.</p>
     %Plan: 13</pre>
 </dd>
 </li>
-<dt><strong><a name="testmlblockmarker_optional" class="item">TestMLBlockMarker - <em>optional</em></a></strong>
+<dt><strong><a name="blockmarker_optional" class="item">BlockMarker - <em>optional</em></a></strong>
 
 <dd>
 <p>If you choose to use the TestML data markup to encode your data section,
@@ -1048,18 +1082,18 @@ the specified pattern to indicate the start of the data section.</p>
 </dd>
 <dd>
 <pre>
-    %TestMLBlockMarker: *=*</pre>
+    %BlockMarker: *=*</pre>
 </dd>
 </li>
-<dt><strong><a name="testmlpointmarker_optional" class="item">TestMLPointMarker - <em>optional</em></a></strong>
+<dt><strong><a name="pointmarker_optional" class="item">PointMarker - <em>optional</em></a></strong>
 
 <dd>
-<p>This option is the same as the TestMLBlockMarker option above, except
+<p>This option is the same as the BlockMarker option above, except
 it is for the data point marker.</p>
 </dd>
 <dd>
 <pre>
-    %TestMLPointMarker: +++</pre>
+    %PointMarker: +++</pre>
 </dd>
 </li>
 </dl>
