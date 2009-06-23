@@ -541,9 +541,13 @@ A constant is a name beginning with an upper case letter. It refers to a
 constant value defined in the standard library. It contains things like
 True, False and Null.
 
-=item argument-list := ( sub-expression ( ws* ',' ws* sub-expression )* )?
+=item argument-list := ( argument ( ws* ',' ws* argument )* )?
 
 An argument list is a list of zero or more sub expressions.
+
+=item argument := sub-expression
+
+Any sub-expression can be an argument.
 
 =item assertion-expression := assertion-operation | assertion-call
 
