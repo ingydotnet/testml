@@ -4,7 +4,7 @@ A Software Testing Meta Language
 
 =head1 Status
 
-Working Draft - 19 May, 2009
+Working Draft - 21 June, 2009
 
 This document is the TestML Language Specification. Version 1.0
 Pre-release.
@@ -34,7 +34,7 @@ document example:
 
     %TestML: 1.0
 
-    input.uppercase() == output;
+    $input.uppercase() == $output;
 
     === Test mixed case string
     --- input: I Like Pie
@@ -51,7 +51,7 @@ In this case, a programmer of any given language would do the following:
 =item * Implement an application that can turn strings to upper case.
 
 =item * Implement a TestML "bridge class" that defines the 'uppercase'
-transform to invoke the Foo application's upper casing facility.
+transform to invoke the application's upper casing facility.
 
 =item * Set up their test environment to use TestML to run the test.
 
@@ -262,6 +262,8 @@ NOTE: Non-PRINTABLE characters are not allowed in a TestML stream. The
 
 =item * DIGIT - '[0-9]' - A numeric digit
 
+=item * DOLLAR - '\$' - A dollar sign character
+
 =item * DOT - '\.' - A period character
 
 =item * HASH - '#' - An octothorpe (or hash) character
@@ -293,8 +295,8 @@ Here is an example document:
     %TestML: 1.0
 
     # And test statements.
-    foo.upper() == bar;
-    foo == bar.lower();
+    $foo.upper() == $bar;
+    $foo == $bar.lower();
 
     # And a data section that defines data blocks.
     === Test vowels
@@ -360,8 +362,8 @@ defined settings.
     ( 'Title'
     | 'Data'
     | 'Plan'
-    | 'TestMLBlockMarker'
-    | 'TestMLPointMarker'
+    | 'BlockMarker'
+    | 'PointMarker'
     )
 
 The listed keywords represent the core meta settings supported in TestML
@@ -413,20 +415,29 @@ before an optional comment.
 
 This section of TestML is the mini, generic programming language. In a
 nutshell, the language consists of a list of chained expressions, some
-of which make assertions. The following statements are valid:
+of which make assertions. The following statements are valid syntax:
 
+    # Expressions:
+    'string';
     function();
-    data_point.transform();
-    data_point.transform1().transform2();
-    data.trans('string1', "string2");
-    data1.trans1(data2, 'str').trans2(data3.trans3);
+    Constant;
+    $data_point;
+    $data_point.transform();
+    $data_point.transform1().transform2();
+    $data.trans('string', "string");
+    $data1.trans1($data2, 'str').trans2($data3.trans3);
 
-    full_expression1.EQ(full_expression2);
-    full_expression1 == full_expression2;
+    # Assertions:
+    <expression> == 'string';
+    <expression> == Constant;
+    <expression> == <expression>;
+    <expression>.EQ(<expression>);
 
-The first five statements are test expressions. The last two lines are
-test assertions which test the results of two expressions. The two are
-equivalent operations using different syntax.
+Lines beginning with '#' are comments. The first eight statements are
+test I<expressions>. The last four lines are test assertions which test
+the results of two expressions. The last two are equivalent operations
+using different syntax. (Note: Replace '<expression>' with any valid
+expression. '<foo>' is not valid TestML syntax)
 
 =item test-section := ( ws | test-statement )*
 
@@ -457,11 +468,21 @@ test operation by comparing the results of two data expressions.
 A test expression is a series of one or more sub expressions which are
 evaluated in order, passing the result of each to the next one.
 
-=item sub-expression := (transform-call | data-point)
+=item sub-expression :=
+    (transform-call | data-point | quoted-string | constant))
 
 A sub expression can either start with a plain point name or a transform
 function call. Then it is proceeded by a chain of any number of
 transform calls.
+
+All sub expressions are turned into transform calls after compilation. For
+example:
+
+   $foo.bar("baz") == True;
+
+becomes (internally):
+
+   Point('foo').bar(String("baz")).EQ(Global('True'));
 
 =item transform-call := transform-name '(' ws* argument-list ws* ')'
 
@@ -487,53 +508,57 @@ A core data transform is defined in the TestML Standard Library.
 A call indicator is a period between two sub expressions. The period
 must be adjecent to one of the sub expressions.
 
-=item data-point := user-point | core-point
+=item data-point := DOLLAR LOWER WORD*
 
-A data point is either a user defined data point, or a core global
-data point.
+A data point is a user defined data name, preceded by a '$' and
+beginning with a lower case letter.
 
 A data point is really a short form for a transform call to 'Point' with
 the point name. These are the same:
 
-    foo.bar();
+    $foo.bar();
     Point('foo').bar();
 
-except that the bareword point names are also used to select the data
+except that the dollar sign point names are also used to select the data
 blocks that will apply to that expression.
 
-=item user-point := LOWER WORD*
+Statements with points in them apply to all matching blocks. For
+example, this TestML statement:
 
-A user data point name begins with a lower case letter. It refers to an
-element of the current data block.
+    $foo.bar() == $baz;
 
-=item core-point := UPPER WORD*
+would behave like this TestMLesque pseudo-code:
 
-A core data point name begins with an upper case letter. It refers to an
-element of the standard library global data block. It contains things like
-True, False, Null and PI.
+    for block in SelectDataBlocks('foo', 'baz') {
+        Assert(block.Point('foo').bar() == block.Point('baz'));
+    }
 
-=item argument-list := ( argument ( ws* ',' ws* argument )* )?
+NOTE: The above code is B<NOT> valid TestML.
 
-An argument is zero or more arguments.
+=item constant := UPPER WORD*
 
-=item argument := sub-expression | quoted-string
+A constant is a name beginning with an upper case letter. It refers to a
+constant value defined in the standard library. It contains things like
+True, False and Null.
 
-An argument can either be a data expression or a quoted string.
+=item argument-list := ( sub-expression ( ws* ',' ws* sub-expression )* )?
+
+An argument list is a list of zero or more sub expressions.
 
 =item assertion-expression := assertion-operation | assertion-call
 
 An assertion expression is a declaration of a testing operation. A typical
 assertion looks like:
 
-    input-point.transform1().transform2(arguments) == expected-output-point
+    $input-point.transform1().transform2(arguments) == $expected-output-point;
 
 An assertion expression can either be an inline operator expression:
 
-    foo == bar
+    $foo == $bar;
 
 or a function call:
 
-    foo.EQ(bar)
+    $foo.EQ($bar);
 
 =item assertion-operation := ws+ assertion-operator ws+ test-expression
 
@@ -575,7 +600,7 @@ be specified in YAML, JSON or XML.
 
 The parsing of the data section should instantiate a Data object.
 
-=item testml-data-section := testml-data-block-marker (SPACE | EOL) rest
+=item testml-data-section := block-marker (SPACE | EOL) rest
 
 The I<TestML data section> starts when the data block marker is detected
 at the beginning of a line and continues to the end of the file. This
@@ -669,12 +694,12 @@ the start of the data section. It contains an optional label.
 
     === The next big test
 
-=item block-marker := '===' | Meta.TestMLBlockMarker
+=item block-marker := '===' | Meta.BlockMarker
 
 A block marker is usually C<===>, but it is configurable via a meta
 statement, like this:
 
-    TestMLBlockMarker: ***
+    BlockMarker: ***
 
 =item block-label :=
     (ANY - (SPACE | BREAK))
@@ -705,12 +730,12 @@ A "phrase" data point encodes a string with no newlines.
 
     --- phrase: This string is one line with no newline at the end.
 
-=item point-marker := '---' | Meta.TestMLPointMarker
+=item point-marker := '---' | Meta.PointMarker
 
 A point marker is usually C<--->, but it is configurable via a meta
 statement, like this:
 
-    %TestMLPointMarker: +++
+    %PointMarker: +++
 
 =back
 
@@ -778,7 +803,7 @@ should complain or raise an exception.
 
     %Plan: 13
 
-=item TestMLBlockMarker - I<optional>
+=item BlockMarker - I<optional>
 
 If you choose to use the TestML data markup to encode your data section,
 you can choose the character sequence to replace the default ('===').
@@ -788,14 +813,14 @@ a line in your data.
 Setting this option causes the parser to immediately start looking for
 the specified pattern to indicate the start of the data section.
 
-    %TestMLBlockMarker: *=*
+    %BlockMarker: *=*
 
-=item TestMLPointMarker - I<optional>
+=item PointMarker - I<optional>
 
-This option is the same as the TestMLBlockMarker option above, except
+This option is the same as the BlockMarker option above, except
 it is for the data point marker.
 
-    %TestMLPointMarker: +++
+    %PointMarker: +++
 
 =back
 
