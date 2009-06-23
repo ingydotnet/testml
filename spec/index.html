@@ -709,10 +709,16 @@ constant value defined in the standard library. It contains things like
 True, False and Null.</p>
 </dd>
 </li>
-<dt><strong>argument-list := ( sub-expression ( ws* ',' ws* sub-expression )* )?</strong>
+<dt><strong><a name="argument" class="item">argument-list := ( argument ( ws* ',' ws* argument )* )?</a></strong>
 
 <dd>
 <p>An argument list is a list of zero or more sub expressions.</p>
+</dd>
+</li>
+<dt><strong><a name="argument_sub_expression" class="item">argument := sub-expression</a></strong>
+
+<dd>
+<p>Any sub-expression can be an argument.</p>
 </dd>
 </li>
 <dt><strong><a name="assertion_expression_assertion_operation_assertion_call" class="item">assertion-expression := assertion-operation | assertion-call</a></strong>
