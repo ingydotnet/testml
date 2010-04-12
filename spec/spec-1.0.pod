@@ -34,7 +34,7 @@ document example:
 
     %TestML: 1.0
 
-    $input.uppercase() == $output;
+    *input.uppercase() == *output;
 
     === Test mixed case string
     --- input: I Like Pie
@@ -262,7 +262,7 @@ NOTE: Non-PRINTABLE characters are not allowed in a TestML stream. The
 
 =item * DIGIT - '[0-9]' - A numeric digit
 
-=item * DOLLAR - '\$' - A dollar sign character
+=item * STAR - '\*' - An asterisk
 
 =item * DOT - '\.' - A period character
 
@@ -295,8 +295,8 @@ Here is an example document:
     %TestML: 1.0
 
     # And test statements.
-    $foo.upper() == $bar;
-    $foo == $bar.lower();
+    *foo.upper() == *bar;
+    *foo == *bar.lower();
 
     # And a data section that defines data blocks.
     === Test vowels
@@ -421,11 +421,11 @@ of which make assertions. The following statements are valid syntax:
     'string';
     function();
     Constant;
-    $data_point;
-    $data_point.transform();
-    $data_point.transform1().transform2();
-    $data.trans('string', "string");
-    $data1.trans1($data2, 'str').trans2($data3.trans3);
+    *data_point;
+    *data_point.transform();
+    *data_point.transform1().transform2();
+    *data.trans('string', "string");
+    *data1.trans1(*data2, 'str').trans2(*data3.trans3);
 
     # Assertions:
     <expression> == 'string';
@@ -478,7 +478,7 @@ transform calls.
 All sub expressions are turned into transform calls after compilation. For
 example:
 
-   $foo.bar("baz") == True;
+   *foo.bar("baz") == True;
 
 becomes (internally):
 
@@ -508,24 +508,24 @@ A core data transform is defined in the TestML Standard Library.
 A call indicator is a period between two sub expressions. The period
 must be adjecent to one of the sub expressions.
 
-=item data-point := DOLLAR LOWER WORD*
+=item data-point := STAR LOWER WORD*
 
-A data point is a user defined data name, preceded by a '$' and
+A data point is a user defined data name, preceded by a '*' and
 beginning with a lower case letter.
 
 A data point is really a short form for a transform call to 'Point' with
 the point name. These are the same:
 
-    $foo.bar();
+    *foo.bar();
     Point('foo').bar();
 
-except that the dollar sign point names are also used to select the data
+except that the asterisk point names are also used to select the data
 blocks that will apply to that expression.
 
 Statements with points in them apply to all matching blocks. For
 example, this TestML statement:
 
-    $foo.bar() == $baz;
+    *foo.bar() == *baz;
 
 would behave like this TestMLesque pseudo-code:
 
@@ -554,15 +554,15 @@ Any sub-expression can be an argument.
 An assertion expression is a declaration of a testing operation. A typical
 assertion looks like:
 
-    $input-point.transform1().transform2(arguments) == $expected-output-point;
+    *input-point.transform1().transform2(arguments) == *expected-output-point;
 
 An assertion expression can either be an inline operator expression:
 
-    $foo == $bar;
+    *foo == *bar;
 
 or a function call:
 
-    $foo.EQ($bar);
+    *foo.EQ(*bar);
 
 =item assertion-operation := ws+ assertion-operator ws+ test-expression
 
