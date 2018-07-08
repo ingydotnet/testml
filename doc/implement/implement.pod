@@ -1,5 +1,0 @@
-=head1 TestML Implementor's Guide
-
-Everything you need to know to implement TestML
-
-=cut

@@ -1,5 +1,0 @@
-=head1 TestML Runtime Specification
-
-The document defines how a TestML 1.0 runtime implementation must behave.
-
-=cut
